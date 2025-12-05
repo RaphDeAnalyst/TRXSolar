@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --app --no-git --no-eslint --src-dir)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev)",
+      "Bash(taskkill:*)",
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(npx tailwindcss --help:*)",
+      "Bash(npm uninstall:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

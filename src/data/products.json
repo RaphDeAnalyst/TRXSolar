@@ -1,0 +1,146 @@
+{
+  "solar-panels": [
+    {
+      "id": "panel-001",
+      "name": "400W Monocrystalline Panel",
+      "brand": "TRX Solar",
+      "category": "solar-panels",
+      "price": 299,
+      "image": "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&h=400&fit=crop",
+      "gallery": ["https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&h=400&fit=crop"],
+      "specs": {
+        "wattage": 400,
+        "efficiency": "21.5%",
+        "voltage": "40.5V",
+        "warranty": "25 years"
+      },
+      "description": "High-efficiency monocrystalline solar panel with 21.5% conversion rate. Ideal for residential and commercial installations.",
+      "featured": true
+    },
+    {
+      "id": "panel-002",
+      "name": "550W Monocrystalline Panel",
+      "brand": "Jinko",
+      "category": "solar-panels",
+      "price": 449,
+      "image": "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=600&h=400&fit=crop",
+      "gallery": ["https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=600&h=400&fit=crop"],
+      "specs": {
+        "wattage": 550,
+        "efficiency": "22.4%",
+        "voltage": "41.2V",
+        "warranty": "25 years"
+      },
+      "description": "Premium high-power monocrystalline panel with advanced efficiency. Perfect for maximum energy generation.",
+      "featured": true
+    },
+    {
+      "id": "panel-003",
+      "name": "350W Polycrystalline Panel",
+      "brand": "Canadian Solar",
+      "category": "solar-panels",
+      "price": 199,
+      "image": "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&h=400&fit=crop",
+      "gallery": ["https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&h=400&fit=crop"],
+      "specs": {
+        "wattage": 350,
+        "efficiency": "18.5%",
+        "voltage": "37.3V",
+        "warranty": "20 years"
+      },
+      "description": "Cost-effective polycrystalline solar panel suitable for budget-conscious installations.",
+      "featured": false
+    }
+  ],
+  "inverters": [
+    {
+      "id": "inv-001",
+      "name": "3000W Hybrid Inverter",
+      "brand": "Growatt",
+      "category": "inverters",
+      "price": 599,
+      "image": "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&h=400&fit=crop",
+      "gallery": ["https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&h=400&fit=crop"],
+      "specs": {
+        "power": "3000W",
+        "input_voltage": "48V",
+        "efficiency": "97%",
+        "warranty": "10 years"
+      },
+      "description": "Hybrid inverter with battery support. Convert DC to AC and manage battery charging seamlessly.",
+      "featured": true
+    },
+    {
+      "id": "inv-002",
+      "name": "5000W Pure Sine Inverter",
+      "brand": "Epever",
+      "category": "inverters",
+      "price": 799,
+      "image": "https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?w=600&h=400&fit=crop",
+      "gallery": ["https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?w=600&h=400&fit=crop"],
+      "specs": {
+        "power": "5000W",
+        "input_voltage": "48V",
+        "efficiency": "96%",
+        "warranty": "5 years"
+      },
+      "description": "High-power pure sine wave inverter for large installations. Supports multiple battery banks.",
+      "featured": false
+    }
+  ],
+  "batteries": [
+    {
+      "id": "bat-001",
+      "name": "10kWh Lithium Battery Pack",
+      "brand": "LG Chem",
+      "category": "batteries",
+      "price": 3999,
+      "image": "https://images.unsplash.com/photo-1591696205602-2f950c417cb9?w=600&h=400&fit=crop",
+      "gallery": ["https://images.unsplash.com/photo-1591696205602-2f950c417cb9?w=600&h=400&fit=crop"],
+      "specs": {
+        "capacity": "10kWh",
+        "voltage": "48V",
+        "cycles": "6000+",
+        "warranty": "10 years"
+      },
+      "description": "Premium lithium iron phosphate battery with advanced management system. Safe and reliable energy storage.",
+      "featured": true
+    },
+    {
+      "id": "bat-002",
+      "name": "5kWh Lead Acid Battery Bank",
+      "brand": "Victron",
+      "category": "batteries",
+      "price": 1499,
+      "image": "https://images.unsplash.com/photo-1624397640148-949b1732bb0a?w=600&h=400&fit=crop",
+      "gallery": ["https://images.unsplash.com/photo-1624397640148-949b1732bb0a?w=600&h=400&fit=crop"],
+      "specs": {
+        "capacity": "5kWh",
+        "voltage": "48V",
+        "cycles": "1000+",
+        "warranty": "3 years"
+      },
+      "description": "Traditional lead-acid battery bank with proven reliability. Cost-effective energy storage solution.",
+      "featured": false
+    }
+  ],
+  "accessories": [
+    {
+      "id": "acc-001",
+      "name": "MPPT Charge Controller 100A",
+      "brand": "Epever",
+      "category": "accessories",
+      "price": 349,
+      "image": "https://images.unsplash.com/photo-1562618291-aa19f7c77f51?w=600&h=400&fit=crop",
+      "gallery": ["https://images.unsplash.com/photo-1562618291-aa19f7c77f51?w=600&h=400&fit=crop"],
+      "specs": {
+        "current": "100A",
+        "input_voltage": "150V",
+        "efficiency": "99%",
+        "warranty": "5 years"
+      },
+      "description": "High-efficiency MPPT controller for optimal battery charging. Essential system component.",
+      "featured": false
+    }
+  ]
+}
