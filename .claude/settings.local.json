@@ -13,7 +13,8 @@
       "Bash(npx tailwindcss --help:*)",
       "Bash(npm uninstall:*)",
       "Bash(git commit:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

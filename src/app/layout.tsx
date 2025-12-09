@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import WhatsAppChat from '@/components/WhatsAppChat';
+import ConditionalLayout from '@/components/ConditionalLayout';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -23,10 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body>
-        <Header />
-        <main className="min-h-[calc(100vh-200px)] pt-[var(--header-height)]">{children}</main>
-        <Footer />
-        <WhatsAppChat />
+        <ConditionalLayout>{children}</ConditionalLayout>
       </body>
     </html>
   );
