@@ -7,6 +7,15 @@ import AdminProductTable from '@/components/admin/AdminProductTable';
 import AdminProductForm from '@/components/admin/AdminProductForm';
 import { generateSKU } from '@/lib/admin/skuGenerator';
 
+// Session management constants
+const ADMIN_SESSION_KEY = 'vcsolar_admin_session';
+const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+
+interface AdminSession {
+  authenticated: boolean;
+  timestamp: number;
+}
+
 export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -15,8 +24,41 @@ export default function AdminPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
 
   const ADMIN_PASSWORD = 'solar2024'; // Change this to env variable later
+
+  // Check for existing valid session on mount
+  useEffect(() => {
+    const checkExistingSession = () => {
+      try {
+        const storedSession = localStorage.getItem(ADMIN_SESSION_KEY);
+
+        if (storedSession) {
+          const session: AdminSession = JSON.parse(storedSession);
+          const now = Date.now();
+          const sessionAge = now - session.timestamp;
+
+          // Check if session is still valid (less than 7 days old)
+          if (session.authenticated && sessionAge < SESSION_DURATION) {
+            setIsAuthenticated(true);
+            console.log(`Session valid. Expires in ${Math.floor((SESSION_DURATION - sessionAge) / (24 * 60 * 60 * 1000))} days.`);
+          } else {
+            // Session expired, clear it
+            localStorage.removeItem(ADMIN_SESSION_KEY);
+            console.log('Session expired. Please login again.');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+        localStorage.removeItem(ADMIN_SESSION_KEY);
+      } finally {
+        setIsCheckingSession(false);
+      }
+    };
+
+    checkExistingSession();
+  }, []);
 
   // Load products on mount
   useEffect(() => {
@@ -32,8 +74,21 @@ export default function AdminPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      setPassword('');
+      // Create session and store in localStorage
+      const session: AdminSession = {
+        authenticated: true,
+        timestamp: Date.now(),
+      };
+
+      try {
+        localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(session));
+        setIsAuthenticated(true);
+        setPassword('');
+        console.log('Login successful. Session will expire in 7 days.');
+      } catch (error) {
+        console.error('Error storing session:', error);
+        alert('Error creating session. Please try again.');
+      }
     } else {
       alert('Incorrect password');
       setPassword('');
@@ -41,6 +96,14 @@ export default function AdminPage() {
   };
 
   const handleLogout = () => {
+    // Clear session from localStorage
+    try {
+      localStorage.removeItem(ADMIN_SESSION_KEY);
+      console.log('Logged out successfully.');
+    } catch (error) {
+      console.error('Error clearing session:', error);
+    }
+
     setIsAuthenticated(false);
     setProducts([]);
     setShowForm(false);
@@ -123,6 +186,20 @@ export default function AdminPage() {
     return matchesSearch && matchesCategory;
   });
 
+  // Show loading state while checking session
+  if (isCheckingSession) {
+    return (
+      <div className="w-full">
+        <div className="max-w-md mx-auto px-sm py-2xl flex items-center justify-center min-h-[calc(100vh-200px)]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-md"></div>
+            <p className="text-body text-text-secondary">Checking session...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="w-full">
@@ -158,6 +235,13 @@ export default function AdminPage() {
             <p className="text-caption text-text-secondary text-center">
               Demo password: <code className="font-mono bg-background px-xs py-xs rounded">solar2024</code>
             </p>
+
+            {/* Session Info */}
+            <div className="bg-primary/10 border border-primary rounded p-sm">
+              <p className="text-caption text-text-secondary text-center">
+                🔒 Sessions last for <strong>7 days</strong> and persist across browser restarts
+              </p>
+            </div>
           </form>
         </div>
       </div>
