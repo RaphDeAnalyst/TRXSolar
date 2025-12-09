@@ -1,7 +1,10 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import ProductCard from '@/components/ProductCard';
+import ProductImageGallery from '@/components/ProductImageGallery';
+import ProductCTAButtons from '@/components/ProductCTAButtons';
+import WarrantyBadge from '@/components/WarrantyBadge';
+import WishlistButton from '@/components/WishlistButton';
+import RelatedProducts from '@/components/RelatedProducts';
 import productsData from '@/data/products.json';
 import { Product } from '@/lib/types';
 
@@ -14,7 +17,7 @@ interface ProductPageProps {
 export function generateStaticParams() {
   const allProducts: Product[] = [];
   Object.values(productsData).forEach((categoryProducts) => {
-    allProducts.push(...categoryProducts);
+    allProducts.push(...(categoryProducts as Product[]));
   });
   return allProducts.map((product) => ({
     id: product.id,
@@ -26,13 +29,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   // Find product
   let product: Product | undefined;
-  let categoryKey: string | undefined;
 
-  for (const [key, products] of Object.entries(productsData)) {
+  for (const [, products] of Object.entries(productsData)) {
     const found = (products as Product[]).find((p) => p.id === id);
     if (found) {
       product = found;
-      categoryKey = key;
       break;
     }
   }
@@ -41,11 +42,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  // Get related products from same category
-  const categoryProducts = (productsData[categoryKey as keyof typeof productsData] as Product[]) || [];
-  const relatedProducts = categoryProducts
-    .filter((p) => p.id !== product!.id)
-    .slice(0, 3);
+  // Get all products for related products algorithm
+  const allProducts: Product[] = [];
+  Object.values(productsData).forEach((categoryProducts) => {
+    allProducts.push(...(categoryProducts as Product[]));
+  });
 
   return (
     <div className="w-full">
@@ -68,33 +69,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       <div className="max-w-7xl mx-auto px-sm py-lg">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2xl mb-2xl">
-          {/* Product Image */}
+          {/* Product Image Gallery */}
           <div>
-            <div className="bg-background aspect-square relative">
-              <Image
-                src={product.image}
-                alt={product.name}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-
-            {/* Gallery Thumbnails */}
-            {product.gallery && product.gallery.length > 1 && (
-              <div className="grid grid-cols-4 gap-md mt-md">
-                {product.gallery.map((image, idx) => (
-                  <div key={idx} className="bg-background aspect-square relative">
-                    <Image
-                      src={image}
-                      alt={`${product.name} view ${idx + 1}`}
-                      fill
-                      className="object-cover cursor-pointer hover:opacity-75"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
+            <ProductImageGallery
+              productName={product.name}
+              images={product.gallery || [product.image]}
+            />
           </div>
 
           {/* Product Info */}
@@ -112,9 +92,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <p className="text-body text-text-secondary">{product.brand}</p>
             </div>
 
-            {/* Price */}
+            {/* Price & Warranty */}
             <div className="py-md border-t border-b border-border">
-              <div className="text-3xl font-bold text-primary">₦{product.price.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-md">
+                <div className="text-3xl font-bold text-primary">₦{product.price.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                {product.specs.warranty && (
+                  <WarrantyBadge warranty={String(product.specs.warranty)} />
+                )}
+              </div>
             </div>
 
             {/* Description */}
@@ -139,24 +124,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </div>
             </div>
 
-            {/* CTA */}
-            <button className="w-full bg-primary text-surface py-md min-h-touch font-medium hover:bg-primary-dark transition-colors">
-              Request Quote
-            </button>
+            {/* Wishlist Button */}
+            <WishlistButton productId={product.id} productName={product.name} />
+
+            {/* Dual CTAs */}
+            <ProductCTAButtons product={product} />
           </div>
         </div>
 
         {/* Related Products */}
-        {relatedProducts.length > 0 && (
-          <section className="mt-2xl">
-            <h2 className="text-h2 text-text-primary font-medium mb-lg">Related Products</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
-              {relatedProducts.map((relatedProduct) => (
-                <ProductCard key={relatedProduct.id} product={relatedProduct} />
-              ))}
-            </div>
-          </section>
-        )}
+        <RelatedProducts currentProduct={product} allProducts={allProducts} />
       </div>
     </div>
   );

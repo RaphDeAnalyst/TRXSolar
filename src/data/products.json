@@ -7,12 +7,20 @@
       "category": "solar-panels",
       "price": 299,
       "image": "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&h=400&fit=crop",
-      "gallery": ["https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&h=400&fit=crop"],
+      "gallery": [
+        "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&h=400&fit=crop",
+        "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=600&h=400&fit=crop",
+        "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&h=400&fit=crop",
+        "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&h=400&fit=crop"
+      ],
       "specs": {
         "wattage": 400,
         "efficiency": "21.5%",
         "voltage": "40.5V",
-        "warranty": "25 years"
+        "warranty": "25 years",
+        "dimensions": "1956×992×40mm",
+        "weight": "22.5kg",
+        "certifications": "IEC, CE, TUV"
       },
       "description": "High-efficiency monocrystalline solar panel with 21.5% conversion rate. Ideal for residential and commercial installations.",
       "featured": true
@@ -24,12 +32,19 @@
       "category": "solar-panels",
       "price": 449,
       "image": "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=600&h=400&fit=crop",
-      "gallery": ["https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=600&h=400&fit=crop"],
+      "gallery": [
+        "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=600&h=400&fit=crop",
+        "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&h=400&fit=crop",
+        "https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?w=600&h=400&fit=crop"
+      ],
       "specs": {
         "wattage": 550,
         "efficiency": "22.4%",
         "voltage": "41.2V",
-        "warranty": "25 years"
+        "warranty": "25 years",
+        "dimensions": "2279×1134×35mm",
+        "weight": "28.6kg",
+        "certifications": "IEC, CE, TUV, UL"
       },
       "description": "Premium high-power monocrystalline panel with advanced efficiency. Perfect for maximum energy generation.",
       "featured": true
@@ -46,7 +61,10 @@
         "wattage": 350,
         "efficiency": "18.5%",
         "voltage": "37.3V",
-        "warranty": "20 years"
+        "warranty": "20 years",
+        "dimensions": "1960×992×40mm",
+        "weight": "24.0kg",
+        "certifications": "IEC, CE"
       },
       "description": "Cost-effective polycrystalline solar panel suitable for budget-conscious installations.",
       "featured": false
@@ -60,12 +78,19 @@
       "category": "inverters",
       "price": 599,
       "image": "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&h=400&fit=crop",
-      "gallery": ["https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&h=400&fit=crop"],
+      "gallery": [
+        "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&h=400&fit=crop",
+        "https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?w=600&h=400&fit=crop",
+        "https://images.unsplash.com/photo-1562618291-aa19f7c77f51?w=600&h=400&fit=crop"
+      ],
       "specs": {
         "power": "3000W",
         "input_voltage": "48V",
         "efficiency": "97%",
-        "warranty": "10 years"
+        "warranty": "10 years",
+        "dimensions": "445×330×155mm",
+        "weight": "12.8kg",
+        "certifications": "CE, RoHS"
       },
       "description": "Hybrid inverter with battery support. Convert DC to AC and manage battery charging seamlessly.",
       "featured": true
@@ -82,7 +107,10 @@
         "power": "5000W",
         "input_voltage": "48V",
         "efficiency": "96%",
-        "warranty": "5 years"
+        "warranty": "5 years",
+        "dimensions": "520×380×180mm",
+        "weight": "16.5kg",
+        "certifications": "CE, FCC"
       },
       "description": "High-power pure sine wave inverter for large installations. Supports multiple battery banks.",
       "featured": false
@@ -96,12 +124,19 @@
       "category": "batteries",
       "price": 3999,
       "image": "https://images.unsplash.com/photo-1591696205602-2f950c417cb9?w=600&h=400&fit=crop",
-      "gallery": ["https://images.unsplash.com/photo-1591696205602-2f950c417cb9?w=600&h=400&fit=crop"],
+      "gallery": [
+        "https://images.unsplash.com/photo-1591696205602-2f950c417cb9?w=600&h=400&fit=crop",
+        "https://images.unsplash.com/photo-1624397640148-949b1732bb0a?w=600&h=400&fit=crop",
+        "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&h=400&fit=crop"
+      ],
       "specs": {
         "capacity": "10kWh",
         "voltage": "48V",
         "cycles": "6000+",
-        "warranty": "10 years"
+        "warranty": "10 years",
+        "dimensions": "625×535×290mm",
+        "weight": "95.0kg",
+        "certifications": "UL, CE, UN38.3"
       },
       "description": "Premium lithium iron phosphate battery with advanced management system. Safe and reliable energy storage.",
       "featured": true
@@ -118,7 +153,10 @@
         "capacity": "5kWh",
         "voltage": "48V",
         "cycles": "1000+",
-        "warranty": "3 years"
+        "warranty": "3 years",
+        "dimensions": "520×240×220mm",
+        "weight": "65.0kg",
+        "certifications": "CE, ISO"
       },
       "description": "Traditional lead-acid battery bank with proven reliability. Cost-effective energy storage solution.",
       "featured": false
@@ -137,7 +175,10 @@
         "current": "100A",
         "input_voltage": "150V",
         "efficiency": "99%",
-        "warranty": "5 years"
+        "warranty": "5 years",
+        "dimensions": "295×167×69mm",
+        "weight": "2.8kg",
+        "certifications": "CE, RoHS"
       },
       "description": "High-efficiency MPPT controller for optimal battery charging. Essential system component.",
       "featured": false

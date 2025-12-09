@@ -9,8 +9,8 @@ interface ProductGridProps {
 export default function ProductGrid({ products, isLoading }: ProductGridProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
-        {[...Array(6)].map((_, i) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-md">
+        {[...Array(8)].map((_, i) => (
           <div key={i} className="bg-background animate-pulse h-96 rounded" />
         ))}
       </div>
@@ -26,7 +26,7 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-md">
       {products.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}

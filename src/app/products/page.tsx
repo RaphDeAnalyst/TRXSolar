@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import ProductGrid from '@/components/ProductGrid';
@@ -25,7 +25,7 @@ function roundUpPrice(price: number): number {
   return Math.ceil(price / 100000) * 100000; // Round to nearest 100,000
 }
 
-export default function ProductsPage() {
+function ProductsPageContent() {
   const searchParams = useSearchParams();
   const [category, setCategory] = useState<ProductCategory | null>(
     (searchParams.get('category') as ProductCategory) || null
@@ -33,12 +33,13 @@ export default function ProductsPage() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [brands, setBrands] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(true);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   // Get all products
   const allProducts = useMemo(() => {
     const products: Product[] = [];
     Object.values(productsData).forEach((categoryProducts) => {
-      products.push(...categoryProducts);
+      products.push(...(categoryProducts as Product[]));
     });
     return products;
   }, []);
@@ -56,11 +57,6 @@ export default function ProductsPage() {
     return Array.from(new Set(productsToConsider.map((p) => p.brand))).sort();
   }, [allProducts, category]);
 
-  // Get max price
-  const maxPrice = useMemo(() => {
-    return Math.max(...allProducts.map((p) => p.price));
-  }, [allProducts]);
-
   // Calculate max price based on current category (dynamically adjusts)
   const categoryMaxPrice = useMemo(() => {
     let productsToConsider = allProducts;
@@ -72,10 +68,10 @@ export default function ProductsPage() {
 
     // Get the highest price
     if (productsToConsider.length === 0) return 10000; // Default if no products
-    const maxPrice = Math.max(...productsToConsider.map((p) => p.price));
+    const categoryMax = Math.max(...productsToConsider.map((p) => p.price));
 
     // Round up to nice round number
-    return roundUpPrice(maxPrice);
+    return roundUpPrice(categoryMax);
   }, [allProducts, category]);
 
   // Reset price range and brand selections when category changes
@@ -121,10 +117,158 @@ export default function ProductsPage() {
     setBrands(new Set());
   };
 
+  const handleApplyFilters = () => {
+    setMobileFilterOpen(false);
+  };
+
   return (
     <div className="w-full">
       <div className="max-w-screen-2xl mx-auto px-xs py-lg">
-        {/* Floating Filter Toggle Button (when collapsed) */}
+        {/* Contextual Header Banner */}
+        <div className="mb-md md:mb-lg">
+          <h1 className="text-h2 md:text-h1 font-display font-bold text-text-primary mb-xs">
+            All Solar Components
+          </h1>
+          <p className="text-body text-text-secondary max-w-3xl">
+            Find high-efficiency solar panels, inverters, and batteries for your residential or commercial project.
+          </p>
+        </div>
+
+        {/* Mobile Filter Button - Always visible on mobile */}
+        <button
+          type="button"
+          onClick={() => setMobileFilterOpen(true)}
+          className="md:hidden w-full max-w-md mx-auto flex items-center justify-center gap-xs px-md py-sm bg-primary text-white hover:bg-primary-dark transition-colors rounded shadow-md mb-md font-sans font-semibold"
+          aria-label="Open filters"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+          </svg>
+          <span>Filter Products</span>
+        </button>
+
+        {/* Mobile Filter Drawer - Full screen modal */}
+        {mobileFilterOpen && (
+          <div className="md:hidden fixed inset-0 z-50 bg-white overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-white border-b border-border px-md py-sm flex items-center justify-between shadow-sm">
+              <h2 className="text-lg font-display font-semibold text-text-primary">Refine Your Search</h2>
+              <button
+                type="button"
+                onClick={() => setMobileFilterOpen(false)}
+                className="w-10 h-10 flex items-center justify-center hover:bg-background rounded-full transition-colors"
+                aria-label="Close filters"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Filter Content */}
+            <div className="p-md space-y-lg pb-32">
+              {/* Category Filter */}
+              <div>
+                <h3 className="text-base font-sans font-semibold text-text-primary mb-sm">Category</h3>
+                <div className="space-y-sm">
+                  <button
+                    type="button"
+                    onClick={() => setCategory(null)}
+                    className={`block w-full text-left text-base font-sans px-3 py-2 rounded transition-colors ${
+                      category === null ? 'bg-primary text-white font-semibold' : 'text-text-primary hover:bg-background'
+                    }`}
+                  >
+                    All Products
+                  </button>
+                  {CATEGORIES.map((cat) => (
+                    <button
+                      type="button"
+                      key={cat.value}
+                      onClick={() => setCategory(cat.value)}
+                      className={`block w-full text-left text-base font-sans px-3 py-2 rounded transition-colors ${
+                        category === cat.value ? 'bg-primary text-white font-semibold' : 'text-text-primary hover:bg-background'
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price Filter */}
+              <div className="pt-md border-t border-border">
+                <h3 className="text-base font-sans font-semibold text-text-primary mb-sm">Price Range</h3>
+                <div className="space-y-md">
+                  <input
+                    type="range"
+                    min="0"
+                    max={categoryMaxPrice}
+                    value={priceRange[0]}
+                    onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
+                    className="w-full h-2"
+                    aria-label="Minimum price"
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max={categoryMaxPrice}
+                    value={priceRange[1]}
+                    onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+                    className="w-full h-2"
+                    aria-label="Maximum price"
+                  />
+                  <div className="text-sm font-mono font-bold text-text-primary">
+                    ₦{priceRange[0].toLocaleString('en-NG')} - ₦{priceRange[1].toLocaleString('en-NG')}
+                  </div>
+                </div>
+              </div>
+
+              {/* Brand Filter */}
+              {uniqueBrands.length > 0 && (
+                <div className="pt-md border-t border-border">
+                  <h3 className="text-base font-sans font-semibold text-text-primary mb-sm">Brand</h3>
+                  <div className="space-y-sm">
+                    {uniqueBrands.map((brand) => (
+                      <label key={brand} className="flex items-center gap-sm cursor-pointer py-xs">
+                        <input
+                          type="checkbox"
+                          checked={brands.has(brand)}
+                          onChange={() => handleBrandToggle(brand)}
+                          className="w-5 h-5 min-w-[20px] min-h-[20px]"
+                        />
+                        <span className="text-base font-sans text-text-primary">{brand}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Clear Filters */}
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="w-full text-base font-sans text-primary hover:text-primary-dark font-medium pt-md border-t border-border text-center"
+              >
+                Clear All Filters
+              </button>
+            </div>
+
+            {/* Sticky Apply Filters CTA */}
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-border p-md shadow-lg">
+              <div className="max-w-md mx-auto">
+                <button
+                  type="button"
+                  onClick={handleApplyFilters}
+                  className="w-full bg-primary text-white font-display font-semibold py-4 rounded-lg hover:bg-primary-dark transition-colors shadow-md text-base"
+                >
+                  Apply Filters ({filteredProducts.length} {filteredProducts.length !== 1 ? 'products' : 'product'})
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Floating Filter Toggle Button (when collapsed) - Desktop only */}
         {!showFilters && (
           <button
             type="button"
@@ -135,7 +279,7 @@ export default function ProductsPage() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
             </svg>
-            <span className="text-body font-medium">Filters</span>
+            <span className="text-body font-medium">Refine Search</span>
           </button>
         )}
         <div className="flex flex-col md:flex-row gap-lg">
@@ -150,7 +294,7 @@ export default function ProductsPage() {
                 className="w-full flex items-center justify-between p-sm bg-background hover:bg-border transition-colors rounded mb-md"
                 aria-label="Toggle filters"
               >
-                <span className="text-body font-medium text-text-primary">Filters</span>
+                <span className="text-body font-semibold text-text-primary">Refine Your Search</span>
                 <svg
                   className={`w-5 h-5 transition-transform ${showFilters ? 'rotate-180' : ''}`}
                   fill="none"
@@ -162,13 +306,13 @@ export default function ProductsPage() {
               </button>
               {/* Category Filter */}
               <div>
-                <h3 className="text-body font-medium text-text-primary mb-sm">Category</h3>
+                <h3 className="text-body font-semibold text-text-primary mb-sm">Category</h3>
                 <div className="space-y-sm">
                   <button
                     type="button"
                     onClick={() => setCategory(null)}
-                    className={`block w-full text-left text-caption p-sm rounded transition-colors ${
-                      category === null ? 'bg-primary text-surface' : 'hover:bg-background'
+                    className={`block w-full text-left text-caption px-3 py-2 rounded transition-colors ${
+                      category === null ? 'bg-primary text-white font-semibold' : 'text-text-primary hover:bg-background'
                     }`}
                   >
                     All Products
@@ -178,8 +322,8 @@ export default function ProductsPage() {
                       type="button"
                       key={cat.value}
                       onClick={() => setCategory(cat.value)}
-                      className={`block w-full text-left text-caption p-sm rounded transition-colors ${
-                        category === cat.value ? 'bg-primary text-surface' : 'hover:bg-background'
+                      className={`block w-full text-left text-caption px-3 py-2 rounded transition-colors ${
+                        category === cat.value ? 'bg-primary text-white font-semibold' : 'text-text-primary hover:bg-background'
                       }`}
                     >
                       {cat.label}
@@ -298,5 +442,17 @@ export default function ProductsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="w-full min-h-screen flex items-center justify-center">
+        <p className="text-text-secondary">Loading products...</p>
+      </div>
+    }>
+      <ProductsPageContent />
+    </Suspense>
   );
 }

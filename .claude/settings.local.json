@@ -11,7 +11,9 @@
       "Bash(cat:*)",
       "Bash(curl:*)",
       "Bash(npx tailwindcss --help:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(git commit:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

@@ -215,7 +215,7 @@ export default function QuotePage() {
             </div>
 
             {/* Submit Button */}
-            <div className="flex items-center justify-between pt-lg border-t border-border">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-md pt-lg border-t border-border">
               <Link
                 href="/"
                 className="px-lg py-sm text-body text-text-secondary hover:text-text-primary transition-colors"
@@ -224,7 +224,7 @@ export default function QuotePage() {
               </Link>
               <button
                 type="submit"
-                className="px-xl py-md min-h-touch bg-primary text-surface font-medium hover:bg-primary-dark transition-colors rounded shadow-md"
+                className="w-full sm:w-auto max-w-md px-xl py-md min-h-touch bg-primary text-surface font-medium hover:bg-primary-dark transition-colors rounded shadow-md"
               >
                 Get My Free Quote
               </button>
@@ -301,21 +301,23 @@ export default function QuotePage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="sticky bottom-0 bg-background border-t border-border p-lg flex items-center justify-between gap-md">
-                <button
-                  type="button"
-                  onClick={() => setShowSummary(false)}
-                  className="px-lg py-md text-body text-text-secondary hover:text-text-primary hover:bg-border transition-colors rounded"
-                >
-                  Go Back & Edit
-                </button>
-                <button
-                  type="button"
-                  onClick={handleConfirmSubmit}
-                  className="px-xl py-md min-h-touch bg-primary text-surface font-medium hover:bg-primary-dark transition-colors rounded shadow-md"
-                >
-                  Confirm & Submit Quote Request
-                </button>
+              <div className="sticky bottom-0 bg-background border-t border-border p-lg">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-md max-w-2xl mx-auto">
+                  <button
+                    type="button"
+                    onClick={() => setShowSummary(false)}
+                    className="w-full sm:w-auto px-lg py-md text-body text-text-secondary hover:text-text-primary hover:bg-border transition-colors rounded"
+                  >
+                    Go Back & Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmSubmit}
+                    className="w-full sm:w-auto max-w-md px-xl py-md min-h-touch bg-primary text-surface font-medium hover:bg-primary-dark transition-colors rounded shadow-md"
+                  >
+                    Confirm & Submit Quote Request
+                  </button>
+                </div>
               </div>
             </div>
           </div>

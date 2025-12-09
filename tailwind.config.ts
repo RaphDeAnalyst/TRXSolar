@@ -7,7 +7,19 @@ const config: Config = {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    screens: {
+      'sm': '400px',   // Large Mobile/Small Tablet
+      'md': '768px',   // Tablet/Desktop
+      'lg': '1024px',  // Standard Desktop
+      'xl': '1280px',  // Large Monitors
+      '2xl': '1536px', // Extra Large
+    },
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        display: ['Montserrat', 'sans-serif'],
+        mono: ['Space Mono', 'monospace'],
+      },
       colors: {
         primary: {
           DEFAULT: '#007A87',
@@ -53,6 +65,15 @@ const config: Config = {
       },
       height: {
         'touch': '3rem',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(1rem)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        fadeIn: 'fadeIn 0.3s ease-out',
       },
     },
   },

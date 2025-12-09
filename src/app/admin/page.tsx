@@ -8,7 +8,6 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
-  const [showForm, setShowForm] = useState(false);
 
   const ADMIN_PASSWORD = 'solar2024'; // Change this to env variable later
 
@@ -17,7 +16,7 @@ export default function AdminPage() {
     if (isAuthenticated) {
       const allProducts: Product[] = [];
       Object.values(productsData).forEach((categoryProducts) => {
-        allProducts.push(...categoryProducts);
+        allProducts.push(...(categoryProducts as Product[]));
       });
       setProducts(allProducts);
     }
@@ -36,7 +35,6 @@ export default function AdminPage() {
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-    setShowForm(false);
   };
 
   if (!isAuthenticated) {

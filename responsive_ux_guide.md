@@ -30,6 +30,13 @@ Tablet/Desktop (>= 768px): 3 Columns (grid-cols-3)
 
 Typography Scaling: Ensure the Product Name text scales down slightly on 2-column mobile view (text-sm) to prevent wrap issues, maintaining the line-clamp-2 rule.
 
+Screen Size	Tailwind Breakpoint	Columns per Row	Rationale
+Small Mobile	Default (No prefix)	1 Column (grid-cols-1)	Mandatory for readability and image prominence on the narrowest screens.
+Large Mobile/Small Tablet	sm: (400px up)	2 Columns (sm:grid-cols-2)	Increases density on larger mobile devices while maintaining comfortable card size.
+Tablet/Desktop (Mid-size)	md: (768px up)	3 Columns (md:grid-cols-3)	Standard tablet grid, balances space usage.
+Standard Desktop	lg: (1024px up)	4 Columns (lg:grid-cols-4)	New Request: Provides better spacing and visual hierarchy than 5 columns.
+Large Monitors	xl: (1280px up)	4 Columns (xl:grid-cols-4)	Keeps the 4-column standard across all typical desktop sizes for a consistent, balanced feel.
+
 B. Filter Panel Implementation
 Filter Panel (Desktop): Displayed prominently on the left side.
 

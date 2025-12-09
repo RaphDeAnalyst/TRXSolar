@@ -2,13 +2,14 @@ import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
 import ImageCarousel from '@/components/ImageCarousel';
 import productsData from '@/data/products.json';
+import { Product } from '@/lib/types';
 
 export default function Home() {
   // Get featured products from all categories
-  const allProducts = [
-    ...productsData['solar-panels'],
-    ...productsData.inverters,
-    ...productsData.batteries,
+  const allProducts: Product[] = [
+    ...(productsData['solar-panels'] as Product[]),
+    ...(productsData.inverters as Product[]),
+    ...(productsData.batteries as Product[]),
   ];
 
   const featuredProducts = allProducts.filter((p) => p.featured).slice(0, 6);
@@ -20,30 +21,24 @@ export default function Home() {
   return (
     <>
       {/* Hero Section - Split with Carousels */}
-      <section className="w-screen h-screen flex flex-col md:flex-row">
+      <section className="w-screen h-screen pt-[72px] flex flex-col md:flex-row">
         {/* Left - Solar Panels */}
         <div className="relative w-full md:w-1/2 h-1/2 md:h-full">
           <ImageCarousel images={solarPanelImages} alt="Solar Panel" />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-            <div className="text-center text-white px-sm">
-              <h2 className="text-h1 md:text-h1 font-bold mb-md">Solar Panels</h2>
-              <p className="text-body mb-lg max-w-md mx-auto">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+            <div className="text-center text-white px-md md:px-lg max-w-2xl mx-auto">
+              <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-md text-white">
+                High-Efficiency Solar Panels
+              </h1>
+              <p className="text-lg font-sans leading-relaxed mb-lg max-w-md mx-auto text-white">
                 High-efficiency solar panels for maximum energy generation
               </p>
-              <div className="flex flex-col sm:flex-row gap-md justify-center">
-                <Link
-                  href="/quote"
-                  className="inline-block bg-primary text-surface px-lg py-sm min-h-touch font-medium hover:bg-primary-dark transition-colors shadow-md border border-white/20"
-                >
-                  Get Your Free Quote
-                </Link>
-                <Link
-                  href="/products?category=solar-panels"
-                  className="inline-block bg-white/10 backdrop-blur-sm text-white border border-white px-lg py-sm min-h-touch font-medium hover:bg-white/20 transition-colors"
-                >
-                  Shop Solar Panels
-                </Link>
-              </div>
+              <Link
+                href="/products?category=solar-panels"
+                className="inline-block bg-primary-light text-white px-lg py-sm min-h-touch font-display font-semibold hover:bg-primary transition-colors shadow-lg border-2 border-white/40"
+              >
+                Shop Solar Panels
+              </Link>
             </div>
           </div>
         </div>
@@ -51,26 +46,20 @@ export default function Home() {
         {/* Right - Inverters */}
         <div className="relative w-full md:w-1/2 h-1/2 md:h-full">
           <ImageCarousel images={inverterImages} alt="Inverter" />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-            <div className="text-center text-white px-sm">
-              <h2 className="text-h1 md:text-h1 font-bold mb-md">Inverters</h2>
-              <p className="text-body mb-lg max-w-md mx-auto">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+            <div className="text-center text-white px-md md:px-lg max-w-2xl mx-auto">
+              <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-md text-white">
+                Reliable Power Inverters
+              </h1>
+              <p className="text-lg font-sans leading-relaxed mb-lg max-w-md mx-auto text-white">
                 Premium inverters for reliable power conversion
               </p>
-              <div className="flex flex-col sm:flex-row gap-md justify-center">
-                <Link
-                  href="/quote"
-                  className="inline-block bg-primary text-surface px-lg py-sm min-h-touch font-medium hover:bg-primary-dark transition-colors shadow-md border border-white/20"
-                >
-                  Get Your Free Quote
-                </Link>
-                <Link
-                  href="/products?category=inverters"
-                  className="inline-block bg-white/10 backdrop-blur-sm text-white border border-white px-lg py-sm min-h-touch font-medium hover:bg-white/20 transition-colors"
-                >
-                  Shop Inverters
-                </Link>
-              </div>
+              <Link
+                href="/products?category=inverters"
+                className="inline-block bg-primary-light text-white px-lg py-sm min-h-touch font-display font-semibold hover:bg-primary transition-colors shadow-lg border-2 border-white/40"
+              >
+                Shop Inverters
+              </Link>
             </div>
           </div>
         </div>
