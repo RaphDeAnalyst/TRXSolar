@@ -14,7 +14,9 @@
       "Bash(npm uninstall:*)",
       "Bash(git commit:*)",
       "Bash(node:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(findstr:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

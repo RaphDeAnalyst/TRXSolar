@@ -44,6 +44,8 @@ export default function EstimateForm() {
 
   const [errors, setErrors] = useState<Partial<Record<keyof EstimateFormData, string>>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const updateFormData = (field: keyof EstimateFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -77,24 +79,50 @@ export default function EstimateForm() {
       return;
     }
 
-    // Console log for now (backend integration later)
-    console.log('Estimate Form submitted:', formData);
+    setIsSubmitting(true);
+    setSubmitError('');
 
-    // Show success message
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
+    try {
+      // Transform form data to API payload format
+      const payload = {
+        name: formData.fullName,
+        email: formData.email,
+        phone: `${formData.countryCode} ${formData.phone}`,
+        message: `Project Type: ${formData.projectType}\nInstallation Address: ${formData.address}\nTimeframe: ${formData.timeframe || 'Not specified'}\n\nAdditional Notes:\n${formData.notes || 'None'}`
+      };
 
-    // Reset form
-    setFormData({
-      projectType: '',
-      address: '',
-      fullName: '',
-      email: '',
-      phone: '',
-      countryCode: '+234',
-      timeframe: '',
-      notes: '',
-    });
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to submit form');
+      }
+
+      // Show success message
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 5000);
+
+      // Reset form
+      setFormData({
+        projectType: '',
+        address: '',
+        fullName: '',
+        email: '',
+        phone: '',
+        countryCode: '+234',
+        timeframe: '',
+        notes: '',
+      });
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -104,6 +132,12 @@ export default function EstimateForm() {
           <p className="font-medium">
             Thank you! We'll prepare your solar estimate and contact you shortly.
           </p>
+        </div>
+      )}
+
+      {submitError && (
+        <div className="bg-error/10 border border-error text-error p-md mb-lg rounded">
+          <p className="font-medium">{submitError}</p>
         </div>
       )}
 
@@ -249,9 +283,10 @@ export default function EstimateForm() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-primary text-surface py-md min-h-touch font-medium hover:bg-primary-dark transition-colors rounded shadow-md"
+            disabled={isSubmitting}
+            className="w-full bg-primary text-surface py-md min-h-touch font-medium hover:bg-primary-dark transition-colors rounded shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Get My Free Estimate
+            {isSubmitting ? 'Submitting...' : 'Get My Free Estimate'}
           </button>
         </div>
       </form>

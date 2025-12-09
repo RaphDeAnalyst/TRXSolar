@@ -38,6 +38,8 @@ export default function GeneralInquiryForm() {
 
   const [errors, setErrors] = useState<Partial<Record<keyof GeneralInquiryFormData, string>>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const updateFormData = (field: keyof GeneralInquiryFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -70,21 +72,46 @@ export default function GeneralInquiryForm() {
       return;
     }
 
-    // Console log for now (backend integration later)
-    console.log('General Inquiry Form submitted:', formData);
+    setIsSubmitting(true);
+    setSubmitError('');
 
-    // Show success message
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
+    try {
+      const payload = {
+        name: formData.fullName,
+        email: formData.email,
+        phone: `${formData.countryCode} ${formData.phone}`,
+        message: formData.message
+      };
 
-    // Reset form
-    setFormData({
-      fullName: '',
-      email: '',
-      phone: '',
-      countryCode: '+234',
-      message: '',
-    });
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to submit form');
+      }
+
+      // Show success message
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 5000);
+
+      // Reset form
+      setFormData({
+        fullName: '',
+        email: '',
+        phone: '',
+        countryCode: '+234',
+        message: '',
+      });
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -94,6 +121,12 @@ export default function GeneralInquiryForm() {
           <p className="font-medium">
             Thank you for your message. We'll get back to you soon!
           </p>
+        </div>
+      )}
+
+      {submitError && (
+        <div className="bg-error/10 border border-error text-error p-md mb-lg rounded">
+          <p className="font-medium">{submitError}</p>
         </div>
       )}
 
@@ -184,9 +217,10 @@ export default function GeneralInquiryForm() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-primary text-surface py-md min-h-touch font-medium hover:bg-primary-dark transition-colors rounded shadow-md"
+            disabled={isSubmitting}
+            className="w-full bg-primary text-surface py-md min-h-touch font-medium hover:bg-primary-dark transition-colors rounded shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Send Message
+            {isSubmitting ? 'Sending...' : 'Send Message'}
           </button>
         </div>
       </form>

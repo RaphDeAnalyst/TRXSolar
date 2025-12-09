@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { Product } from '@/lib/types';
+import { Contact } from '@/types';
 import productsData from '@/data/products.json';
 import AdminProductTable from '@/components/admin/AdminProductTable';
 import AdminProductForm from '@/components/admin/AdminProductForm';
+import AdminContactTable from '@/components/admin/AdminContactTable';
 import { generateSKU } from '@/lib/admin/skuGenerator';
 
 // Session management constants
@@ -26,7 +28,13 @@ export default function AdminPage() {
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [isCheckingSession, setIsCheckingSession] = useState(true);
 
-  const ADMIN_PASSWORD = 'solar2024'; // Change this to env variable later
+  // Contact management state
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [activeTab, setActiveTab] = useState<'products' | 'contacts'>('products');
+  const [contactSearch, setContactSearch] = useState('');
+  const [contactStatusFilter, setContactStatusFilter] = useState('all');
+
+  const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'solar2024';
 
   // Check for existing valid session on mount
   useEffect(() => {
@@ -68,8 +76,26 @@ export default function AdminPage() {
         allProducts.push(...(categoryProducts as Product[]));
       });
       setProducts(allProducts);
+      loadContacts();
     }
   }, [isAuthenticated]);
+
+  // Load contacts from API
+  const loadContacts = async () => {
+    try {
+      const response = await fetch('/api/admin/contacts', {
+        headers: {
+          'Authorization': `Bearer ${ADMIN_PASSWORD}`
+        }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setContacts(data.contacts);
+      }
+    } catch (error) {
+      console.error('Failed to load contacts:', error);
+    }
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -173,6 +199,53 @@ export default function AdminPage() {
     setEditingProduct(null);
   };
 
+  // Contact management handlers
+  const handleUpdateStatus = async (contactId: number, status: string) => {
+    try {
+      const response = await fetch(`/api/admin/contacts/${contactId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ADMIN_PASSWORD}`
+        },
+        body: JSON.stringify({ status })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setContacts(prev => prev.map(c =>
+          c.id === contactId ? { ...c, status: status as Contact['status'] } : c
+        ));
+      } else {
+        alert('Failed to update contact status');
+      }
+    } catch (error) {
+      console.error('Failed to update status:', error);
+      alert('Failed to update contact status');
+    }
+  };
+
+  const handleDeleteContact = async (contactId: number) => {
+    try {
+      const response = await fetch(`/api/admin/contacts/${contactId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${ADMIN_PASSWORD}`
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setContacts(prev => prev.filter(c => c.id !== contactId));
+      } else {
+        alert('Failed to delete contact');
+      }
+    } catch (error) {
+      console.error('Failed to delete contact:', error);
+      alert('Failed to delete contact');
+    }
+  };
+
   // Filter products based on search and category
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
@@ -184,6 +257,19 @@ export default function AdminPage() {
     const matchesCategory = filterCategory === 'all' || product.category === filterCategory;
 
     return matchesSearch && matchesCategory;
+  });
+
+  // Filter contacts based on search and status
+  const filteredContacts = contacts.filter(contact => {
+    const matchesSearch = contactSearch === '' ||
+      contact.name.toLowerCase().includes(contactSearch.toLowerCase()) ||
+      contact.email.toLowerCase().includes(contactSearch.toLowerCase()) ||
+      contact.message.toLowerCase().includes(contactSearch.toLowerCase());
+
+    const matchesStatus = contactStatusFilter === 'all' ||
+      contact.status === contactStatusFilter;
+
+    return matchesSearch && matchesStatus;
   });
 
   // Show loading state while checking session
@@ -282,7 +368,7 @@ export default function AdminPage() {
 
       <div className="max-w-7xl mx-auto px-sm py-lg">
         {/* Stats Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-md mb-lg">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-md mb-lg">
           <div className="bg-surface border border-border p-md rounded-lg">
             <p className="text-caption text-text-secondary mb-xs">Total Products</p>
             <p className="text-h2 font-display font-bold text-primary">{products.length}</p>
@@ -299,58 +385,95 @@ export default function AdminPage() {
               {new Set(products.map((p) => p.category)).size}
             </p>
           </div>
+          <div className="bg-surface border border-border p-md rounded-lg">
+            <p className="text-caption text-text-secondary mb-xs">New Contacts</p>
+            <p className="text-h2 font-display font-bold text-warning">
+              {contacts.filter((c) => c.status === 'new').length}
+            </p>
+          </div>
         </div>
 
-        {/* Action Bar */}
-        <div className="bg-surface border border-border p-md rounded-lg mb-lg">
-          <div className="flex flex-col md:flex-row gap-md items-stretch md:items-center justify-between">
-            {/* Search */}
-            <div className="flex-1 max-w-md">
-              <label htmlFor="search" className="sr-only">
-                Search products
-              </label>
-              <input
-                type="text"
-                id="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by name, brand, or SKU..."
-                className="w-full px-md py-sm border border-border bg-background focus:border-primary focus:outline-none rounded"
-              />
-            </div>
-
-            {/* Category Filter */}
-            <div className="w-full md:w-auto">
-              <label htmlFor="category-filter" className="sr-only">
-                Filter by category
-              </label>
-              <select
-                id="category-filter"
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                className="w-full md:w-auto px-md py-sm border border-border bg-background focus:border-primary focus:outline-none rounded"
-              >
-                <option value="all">All Categories</option>
-                <option value="solar-panels">Solar Panels</option>
-                <option value="inverters">Inverters</option>
-                <option value="batteries">Batteries</option>
-                <option value="accessories">Accessories</option>
-              </select>
-            </div>
-
-            {/* Add New Button */}
+        {/* Tab Navigation */}
+        <div className="bg-surface border border-border rounded-lg mb-lg">
+          <div className="flex gap-sm p-sm">
             <button
               type="button"
-              onClick={handleAddNew}
-              className="w-full md:w-auto px-lg py-sm min-h-touch bg-primary text-white font-display font-semibold hover:bg-primary-dark transition-colors rounded shadow-md flex items-center justify-center gap-xs"
+              onClick={() => setActiveTab('products')}
+              className={`flex-1 py-md px-lg rounded transition-colors ${
+                activeTab === 'products'
+                  ? 'bg-primary text-white'
+                  : 'bg-background text-text-secondary hover:text-text-primary'
+              }`}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Add New Product
+              Products ({products.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('contacts')}
+              className={`flex-1 py-md px-lg rounded transition-colors ${
+                activeTab === 'contacts'
+                  ? 'bg-primary text-white'
+                  : 'bg-background text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              Contacts ({contacts.length})
             </button>
           </div>
         </div>
+
+        {/* Content based on active tab */}
+        {activeTab === 'products' ? (
+          <>
+            {/* Product Management - Action Bar */}
+            <div className="bg-surface border border-border p-md rounded-lg mb-lg">
+              <div className="flex flex-col md:flex-row gap-md items-stretch md:items-center justify-between">
+                {/* Search */}
+                <div className="flex-1 max-w-md">
+                  <label htmlFor="search" className="sr-only">
+                    Search products
+                  </label>
+                  <input
+                    type="text"
+                    id="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search by name, brand, or SKU..."
+                    className="w-full px-md py-sm border border-border bg-background focus:border-primary focus:outline-none rounded"
+                  />
+                </div>
+
+                {/* Category Filter */}
+                <div className="w-full md:w-auto">
+                  <label htmlFor="category-filter" className="sr-only">
+                    Filter by category
+                  </label>
+                  <select
+                    id="category-filter"
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    className="w-full md:w-auto px-md py-sm border border-border bg-background focus:border-primary focus:outline-none rounded"
+                  >
+                    <option value="all">All Categories</option>
+                    <option value="solar-panels">Solar Panels</option>
+                    <option value="inverters">Inverters</option>
+                    <option value="batteries">Batteries</option>
+                    <option value="accessories">Accessories</option>
+                  </select>
+                </div>
+
+                {/* Add New Button */}
+                <button
+                  type="button"
+                  onClick={handleAddNew}
+                  className="w-full md:w-auto px-lg py-sm min-h-touch bg-primary text-white font-display font-semibold hover:bg-primary-dark transition-colors rounded shadow-md flex items-center justify-center gap-xs"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add New Product
+                </button>
+              </div>
+            </div>
 
         {/* Results Count */}
         <div className="mb-md">
@@ -401,25 +524,107 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Demo Notice */}
-        <div className="mt-lg bg-warning bg-opacity-10 border border-warning rounded-lg p-md">
-          <div className="flex gap-md">
-            <svg className="w-6 h-6 text-warning flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <div>
-              <h4 className="text-body font-semibold text-warning mb-xs">Demo Mode</h4>
-              <p className="text-caption text-text-secondary">
-                This is a demonstration admin panel. All changes are stored in memory only and will be lost on page refresh.
-                In a production environment, changes would be persisted to a database (e.g., Vercel Postgres).
+            {/* Demo Notice */}
+            <div className="mt-lg bg-warning bg-opacity-10 border border-warning rounded-lg p-md">
+              <div className="flex gap-md">
+                <svg className="w-6 h-6 text-warning flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <div>
+                  <h4 className="text-body font-semibold text-warning mb-xs">Demo Mode</h4>
+                  <p className="text-caption text-text-secondary">
+                    This is a demonstration admin panel. All changes are stored in memory only and will be lost on page refresh.
+                    In a production environment, changes would be persisted to a database (e.g., Vercel Postgres).
+                  </p>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Contact Management - Search and Filter Bar */}
+            <div className="bg-surface border border-border p-md rounded-lg mb-lg">
+              <div className="flex flex-col md:flex-row gap-md items-stretch md:items-center justify-between">
+                {/* Search */}
+                <div className="flex-1 max-w-md">
+                  <label htmlFor="contact-search" className="sr-only">
+                    Search contacts
+                  </label>
+                  <input
+                    type="text"
+                    id="contact-search"
+                    value={contactSearch}
+                    onChange={(e) => setContactSearch(e.target.value)}
+                    placeholder="Search by name, email, or message..."
+                    className="w-full px-md py-sm border border-border bg-background focus:border-primary focus:outline-none rounded"
+                  />
+                </div>
+
+                {/* Status Filter */}
+                <div className="w-full md:w-auto">
+                  <label htmlFor="status-filter" className="sr-only">
+                    Filter by status
+                  </label>
+                  <select
+                    id="status-filter"
+                    value={contactStatusFilter}
+                    onChange={(e) => setContactStatusFilter(e.target.value)}
+                    className="w-full md:w-auto px-md py-sm border border-border bg-background focus:border-primary focus:outline-none rounded"
+                  >
+                    <option value="all">All Statuses</option>
+                    <option value="new">New</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="resolved">Resolved</option>
+                    <option value="closed">Closed</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Results Count */}
+            <div className="mb-md">
+              <p className="text-body text-text-secondary">
+                Showing <span className="font-semibold text-text-primary">{filteredContacts.length}</span> of{' '}
+                <span className="font-semibold text-text-primary">{contacts.length}</span> contacts
               </p>
             </div>
-          </div>
-        </div>
+
+            {/* Contacts Table */}
+            {filteredContacts.length > 0 ? (
+              <AdminContactTable
+                contacts={filteredContacts}
+                onUpdateStatus={handleUpdateStatus}
+                onDelete={handleDeleteContact}
+              />
+            ) : (
+              <div className="bg-surface border border-border rounded-lg p-xl text-center">
+                <svg
+                  className="w-16 h-16 mx-auto text-text-secondary mb-md"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+                <h3 className="text-h3 font-display font-medium text-text-primary mb-sm">No contacts found</h3>
+                <p className="text-body text-text-secondary">
+                  {contactSearch || contactStatusFilter !== 'all'
+                    ? 'Try adjusting your search or filters'
+                    : 'No contact submissions yet'}
+                </p>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Product Form Modal */}

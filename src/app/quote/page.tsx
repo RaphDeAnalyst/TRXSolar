@@ -25,6 +25,8 @@ export default function QuotePage() {
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [showSummary, setShowSummary] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const updateFormData = (field: keyof FormData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -64,14 +66,50 @@ export default function QuotePage() {
   };
 
   const handleConfirmSubmit = async () => {
-    // Here you would typically send the data to your backend
-    console.log('Form submitted:', formData);
+    setIsSubmitting(true);
+    setSubmitError('');
 
-    // Close modal
-    setShowSummary(false);
+    try {
+      const payload = {
+        name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        message: `Project Type: ${formData.projectType}\nInstallation Timeframe: ${formData.timeframe}\nInstallation Address: ${formData.address}\n\nAdditional Notes:\n${formData.notes || 'None'}`
+      };
 
-    // Show success message
-    alert('Thank you! Your quote request has been submitted. We will contact you shortly.');
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to submit quote request');
+      }
+
+      // Close modal
+      setShowSummary(false);
+
+      // Show success message
+      alert('Thank you! Your quote request has been submitted. We will contact you shortly.');
+
+      // Reset form
+      setFormData({
+        projectType: '',
+        timeframe: '',
+        address: '',
+        fullName: '',
+        email: '',
+        phone: '',
+        notes: '',
+      });
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Failed to submit. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -302,20 +340,27 @@ export default function QuotePage() {
 
               {/* Modal Footer */}
               <div className="sticky bottom-0 bg-background border-t border-border p-lg">
+                {submitError && (
+                  <div className="bg-error/10 border border-error text-error p-md mb-md rounded">
+                    <p className="font-medium">{submitError}</p>
+                  </div>
+                )}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-md max-w-2xl mx-auto">
                   <button
                     type="button"
                     onClick={() => setShowSummary(false)}
-                    className="w-full sm:w-auto px-lg py-md text-body text-text-secondary hover:text-text-primary hover:bg-border transition-colors rounded"
+                    disabled={isSubmitting}
+                    className="w-full sm:w-auto px-lg py-md text-body text-text-secondary hover:text-text-primary hover:bg-border transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Go Back & Edit
                   </button>
                   <button
                     type="button"
                     onClick={handleConfirmSubmit}
-                    className="w-full sm:w-auto max-w-md px-xl py-md min-h-touch bg-primary text-surface font-medium hover:bg-primary-dark transition-colors rounded shadow-md"
+                    disabled={isSubmitting}
+                    className="w-full sm:w-auto max-w-md px-xl py-md min-h-touch bg-primary text-surface font-medium hover:bg-primary-dark transition-colors rounded shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Confirm & Submit Quote Request
+                    {isSubmitting ? 'Submitting...' : 'Confirm & Submit Quote Request'}
                   </button>
                 </div>
               </div>

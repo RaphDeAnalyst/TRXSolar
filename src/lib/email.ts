@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || 'dummy_key_for_build');
 
 export interface ContactEmailData {
   name: string;
@@ -10,10 +10,16 @@ export interface ContactEmailData {
 }
 
 export async function sendContactNotification(data: ContactEmailData) {
+  // Check if API key is configured
+  if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'dummy_key_for_build') {
+    console.warn('Resend API key not configured. Skipping email notification.');
+    return { success: false, error: 'Email service not configured' };
+  }
+
   try {
     const { data: emailData, error } = await resend.emails.send({
-      from: 'TRXSolar <noreply@yourdomain.com>', // Update with your verified domain
-      to: ['admin@yourdomain.com'], // Update with your admin email
+      from: 'VCSolar <noreply@vcsolar.shop>',
+      to: ['sales@vcsolar.shop'],
       subject: `New Contact Form Submission from ${data.name}`,
       html: `
         <h2>New Contact Form Submission</h2>
@@ -39,19 +45,25 @@ export async function sendContactNotification(data: ContactEmailData) {
 }
 
 export async function sendContactConfirmation(data: ContactEmailData) {
+  // Check if API key is configured
+  if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'dummy_key_for_build') {
+    console.warn('Resend API key not configured. Skipping confirmation email.');
+    return { success: false, error: 'Email service not configured' };
+  }
+
   try {
     const { data: emailData, error } = await resend.emails.send({
-      from: 'TRXSolar <noreply@yourdomain.com>', // Update with your verified domain
+      from: 'VCSolar <noreply@vcsolar.shop>',
       to: [data.email],
-      subject: 'Thank you for contacting TRXSolar',
+      subject: 'Thank you for contacting VCSolar',
       html: `
-        <h2>Thank you for contacting TRXSolar</h2>
+        <h2>Thank you for contacting VCSolar</h2>
         <p>Dear ${data.name},</p>
         <p>We have received your message and will get back to you as soon as possible.</p>
         <p><strong>Your message:</strong></p>
         <p>${data.message.replace(/\n/g, '<br>')}</p>
         <hr>
-        <p>Best regards,<br>TRXSolar Team</p>
+        <p>Best regards,<br>VCSolar Team</p>
       `,
     });
 
