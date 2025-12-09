@@ -5,15 +5,16 @@ import { checkAdminAuth, unauthorizedResponse } from '@/lib/auth';
 // GET single contact
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!checkAdminAuth(request)) {
     return unauthorizedResponse();
   }
 
   try {
+    const { id } = await params;
     const result = await sql`
-      SELECT * FROM contacts WHERE id = ${params.id}
+      SELECT * FROM contacts WHERE id = ${id}
     `;
 
     if (result.rows.length === 0) {
@@ -39,13 +40,14 @@ export async function GET(
 // PUT update contact status
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!checkAdminAuth(request)) {
     return unauthorizedResponse();
   }
 
   try {
+    const { id } = await params;
     const body = await request.json();
     const { status } = body;
 
@@ -59,7 +61,7 @@ export async function PUT(
     const result = await sql`
       UPDATE contacts
       SET status = ${status}
-      WHERE id = ${params.id}
+      WHERE id = ${id}
       RETURNING *
     `;
 
@@ -86,15 +88,16 @@ export async function PUT(
 // DELETE contact
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!checkAdminAuth(request)) {
     return unauthorizedResponse();
   }
 
   try {
+    const { id } = await params;
     const result = await sql`
-      DELETE FROM contacts WHERE id = ${params.id}
+      DELETE FROM contacts WHERE id = ${id}
       RETURNING id
     `;
 

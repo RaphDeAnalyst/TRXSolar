@@ -5,15 +5,16 @@ import { checkAdminAuth, unauthorizedResponse } from '@/lib/auth';
 // GET single product
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!checkAdminAuth(request)) {
     return unauthorizedResponse();
   }
 
   try {
+    const { id } = await params;
     const result = await sql`
-      SELECT * FROM products WHERE id = ${params.id}
+      SELECT * FROM products WHERE id = ${id}
     `;
 
     if (result.rows.length === 0) {
@@ -39,13 +40,14 @@ export async function GET(
 // PUT update product
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!checkAdminAuth(request)) {
     return unauthorizedResponse();
   }
 
   try {
+    const { id } = await params;
     const body = await request.json();
     const { name, description, price, image_url, category, specifications } = body;
 
@@ -59,7 +61,7 @@ export async function PUT(
         category = ${category || null},
         specifications = ${JSON.stringify(specifications) || null},
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = ${params.id}
+      WHERE id = ${id}
       RETURNING *
     `;
 
@@ -86,15 +88,16 @@ export async function PUT(
 // DELETE product
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!checkAdminAuth(request)) {
     return unauthorizedResponse();
   }
 
   try {
+    const { id } = await params;
     const result = await sql`
-      DELETE FROM products WHERE id = ${params.id}
+      DELETE FROM products WHERE id = ${id}
       RETURNING id
     `;
 
