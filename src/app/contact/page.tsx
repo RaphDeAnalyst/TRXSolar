@@ -62,7 +62,7 @@ export default function ContactPage() {
 
       {/* Trust Elements Section */}
       <TrustElements
-        email="sales@trxsolar.com"
+        email="sales@vcsolar.com"
         phone="+2348108698673"
         officeHours="Mon-Fri: 8:30 AM - 5:30 PM"
         officeAddress="Plot 20, Ewet Housing Estate, Uyo, Akwa Ibom"

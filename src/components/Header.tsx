@@ -29,7 +29,7 @@ export default function Header() {
       <nav className="max-w-7xl mx-auto px-md h-full flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="text-2xl font-bold text-primary-light">
-          TRXSolar
+          VCSolar
         </Link>
 
         {/* Navigation */}
@@ -149,7 +149,7 @@ export default function Header() {
               className="text-2xl font-bold text-primary-light"
               onClick={() => setMobileMenuOpen(false)}
             >
-              TRXSolar
+              VCSolar
             </Link>
             <button
               type="button"

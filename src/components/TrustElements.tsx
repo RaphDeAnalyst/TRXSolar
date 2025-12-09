@@ -83,7 +83,7 @@ export default function TrustElements({ email, phone, officeHours, officeAddress
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="TRX Solar Office Location - Plot 20, Ewet Housing Estate, Uyo"
+                title="VC Solar Office Location - Plot 20, Ewet Housing Estate, Uyo"
               />
             </div>
           </div>

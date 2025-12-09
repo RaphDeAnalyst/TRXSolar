@@ -18,7 +18,7 @@ The header bar must be permanently visible and highly contrasting.
 
 * **Positioning:** Create a **fixed header bar** at the top (`position: fixed; top: 0; left: 0;`).
 * **Background:** Use a **solid, opaque dark background** (e.g., `bg-gray-900`) for maximum contrast.
-* **Logo/Store Name:** The store name, **"TRXSolar,"** must be placed on the left, styled using a highly visible color (e.g., teal), and function as the link back to the homepage.
+* **Logo/Store Name:** The store name, **"VCSolar,"** must be placed on the left, styled using a highly visible color (e.g., teal), and function as the link back to the homepage.
 * **Navigation:** Include the standard hamburger menu icon (for mobile) on the right side.
 
 ---

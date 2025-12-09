@@ -5,7 +5,7 @@ import WhatsAppChat from '@/components/WhatsAppChat';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'TRXSolar - Premium Solar Solutions',
+  title: 'VCSolar - Premium Solar Solutions',
   description: 'High-quality solar panels, inverters, and batteries for residential and commercial installations.',
   keywords: 'solar panels, inverters, batteries, renewable energy, solar installation',
   viewport: 'width=device-width, initial-scale=1',

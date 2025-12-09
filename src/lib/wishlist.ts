@@ -3,7 +3,7 @@
  * Uses browser's Local Storage API to persist saved items
  */
 
-const WISHLIST_STORAGE_KEY = 'trxsolar_wishlist';
+const WISHLIST_STORAGE_KEY = 'vcsolar_wishlist';
 
 /**
  * Retrieves the current array of product IDs from Local Storage

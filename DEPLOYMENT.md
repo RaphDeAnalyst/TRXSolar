@@ -1,6 +1,6 @@
-# TRXSolar Deployment Guide
+# VCSolar Deployment Guide
 
-This guide covers deploying the TRXSolar website to Vercel and managing it in production.
+This guide covers deploying the VCSolar website to Vercel and managing it in production.
 
 ## Table of Contents
 1. [Vercel Deployment](#vercel-deployment)
@@ -26,9 +26,9 @@ This guide covers deploying the TRXSolar website to Vercel and managing it in pr
    ```bash
    git init
    git add .
-   git commit -m "Initial commit: TRXSolar website"
+   git commit -m "Initial commit: VCSolar website"
    git branch -M main
-   git remote add origin https://github.com/yourusername/trxsolar.git
+   git remote add origin https://github.com/yourusername/vcsolar.git
    git push -u origin main
    ```
 
@@ -54,7 +54,7 @@ npm i -g vercel
 vercel login
 
 # Deploy from project directory
-cd c:\Users\rapha\Desktop\TRXSolar
+cd c:\Users\rapha\Desktop\VCSolar
 vercel
 
 # For production deployment
@@ -77,7 +77,7 @@ No additional configuration needed - Vercel handles Node.js version and optimiza
 ### Add Custom Domain to Vercel
 
 1. Go to Vercel Project Settings → Domains
-2. Add your domain (e.g., `trxsolar.com`)
+2. Add your domain (e.g., `vcsolar.com`)
 3. Choose one of two options:
 
 #### Option A: Use Vercel's Nameservers (Recommended)

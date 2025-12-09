@@ -1,4 +1,4 @@
-# TRXSolar - Quick Start Guide
+# VCSolar - Quick Start Guide
 
 Welcome! Your minimalist solar retail website is ready to go. Here's everything you need to know to get started.
 
@@ -23,7 +23,7 @@ A production-ready, enterprise-grade solar retail website with:
 ### 1. Start Development Server
 
 ```bash
-cd c:\Users\rapha\Desktop\TRXSolar
+cd c:\Users\rapha\Desktop\VCSolar
 npm run dev
 ```
 
@@ -109,12 +109,12 @@ Edit `src/data/products.json`:
 # 1. Initialize Git (if not already done)
 git init
 git add .
-git commit -m "Initial commit: TRXSolar website"
+git commit -m "Initial commit: VCSolar website"
 git branch -M main
 
 # 2. Create repo on GitHub
 # 3. Push code
-git remote add origin https://github.com/yourusername/trxsolar.git
+git remote add origin https://github.com/yourusername/vcsolar.git
 git push -u origin main
 
 # 4. Go to vercel.com
@@ -152,7 +152,7 @@ colors: {
 ```
 
 ### Change Site Name
-Search and replace "TRXSolar" with your company name:
+Search and replace "VCSolar" with your company name:
 - `src/app/layout.tsx` - Page titles
 - `src/components/Header.tsx` - Logo
 - `src/app/page.tsx` - Homepage

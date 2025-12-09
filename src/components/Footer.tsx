@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-lg mb-lg">
           {/* About */}
           <div>
-            <h3 className="font-bold text-lg mb-md">TRXSolar</h3>
+            <h3 className="font-bold text-lg mb-md">VCSolar</h3>
             <p className="text-sm text-gray-300">
               Premium solar solutions for residential and commercial installations.
             </p>
@@ -76,7 +76,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-700 pt-md text-center text-sm text-gray-300">
-          <p>&copy; 2024 TRXSolar. All rights reserved.</p>
+          <p>&copy; 2024 VCSolar. All rights reserved.</p>
         </div>
       </div>
     </footer>

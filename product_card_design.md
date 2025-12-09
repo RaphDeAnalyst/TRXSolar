@@ -34,4 +34,4 @@ Instruct the agent to use specific Tailwind utilities for the layout:
 
 **Example Prompt for Claude Code:**
 
-> "Using the provided visual reference (C:\Users\rapha\Desktop\TRXSolar\product_card_reference.png) and adhering to the `design_system.md` typography rules, create a responsive Tailwind CSS component for a product card. The card must prioritize a **4:5 aspect ratio image**, show only the **Category/Brand, Name (truncated to two lines), and Price**."
+> "Using the provided visual reference (C:\Users\rapha\Desktop\VCSolar\product_card_reference.png) and adhering to the `design_system.md` typography rules, create a responsive Tailwind CSS component for a product card. The card must prioritize a **4:5 aspect ratio image**, show only the **Category/Brand, Name (truncated to two lines), and Price**."

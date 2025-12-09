@@ -118,7 +118,7 @@ export default function Home() {
       {/* Why Choose Us */}
       <section className="py-lg px-sm">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-h2 text-text-primary mb-lg font-medium">Why Choose TRXSolar</h2>
+          <h2 className="text-h2 text-text-primary mb-lg font-medium">Why Choose VCSolar</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
             <div className="bg-surface border border-border p-md">

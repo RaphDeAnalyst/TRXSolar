@@ -8,7 +8,7 @@ Claude, implement the clean and minimal Product Management section within the ex
 
 **The admin panel must use a minimal, internal-focused header and must NOT include any client-side components (footer, client-side navigation links, or the floating WhatsApp icon).**
 
-* **Header:** Must be minimal, containing only the System Title (e.g., "TRXSolar Admin"), User information, and a **Logout** link.
+* **Header:** Must be minimal, containing only the System Title (e.g., "VCSolar Admin"), User information, and a **Logout** link.
 * **Footer & Icon:** Omit the public website footer and the floating WhatsApp icon entirely.
 
 ---

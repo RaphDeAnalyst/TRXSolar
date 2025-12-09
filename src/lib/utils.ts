@@ -28,13 +28,13 @@ Could you provide more details and a quote?`;
  * Generates an email link with pre-filled subject and body containing product details
  */
 export function generateEmailLink(product: Product): string {
-  const email = 'info@trxsolar.com';
+  const email = 'info@vcsolar.com';
   const subject = `Inquiry: ${product.name} - ${product.brand}`;
 
   // Get current page URL if in browser environment
   const pageUrl = typeof window !== 'undefined' ? window.location.href : '';
 
-  const body = `Hello TRX Solar Team,
+  const body = `Hello VC Solar Team,
 
 I am interested in learning more about:
 

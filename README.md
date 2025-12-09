@@ -1,4 +1,4 @@
-# TRXSolar - Premium Solar Retail Website
+# VCSolar - Premium Solar Retail Website
 
 A minimalist, high-performance solar retail website built with Next.js 14, TypeScript, and Tailwind CSS.
 
@@ -55,7 +55,7 @@ npm start
 ## 📁 Project Structure
 
 ```
-trxsolar/
+vcsolar/
 ├── src/
 │   ├── app/
 │   │   ├── (pages)
@@ -98,7 +98,7 @@ Products are stored in `/src/data/products.json`:
     {
       "id": "panel-001",
       "name": "400W Monocrystalline Panel",
-      "brand": "TRX Solar",
+      "brand": "VC Solar",
       "category": "solar-panels",
       "price": 299,
       "image": "/products/panel-001.jpg",

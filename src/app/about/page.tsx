@@ -2,13 +2,13 @@ export default function AboutPage() {
   return (
     <div className="w-full min-h-screen flex items-center justify-center py-lg px-sm">
       <div className="max-w-4xl bg-white border border-border rounded-lg shadow-lg p-xl">
-        <h1 className="text-h1 text-text-primary font-bold mb-lg">About TRXSolar</h1>
+        <h1 className="text-h1 text-text-primary font-bold mb-lg">About VCSolar</h1>
 
         <div className="space-y-lg">
           <section>
             <h2 className="text-h2 text-text-primary font-medium mb-md">Our Mission</h2>
             <p className="text-body text-text-primary leading-relaxed">
-              TRXSolar is dedicated to making renewable energy accessible to everyone. We provide premium solar
+              VCSolar is dedicated to making renewable energy accessible to everyone. We provide premium solar
               products and solutions for residential and commercial installations, helping our customers achieve energy
               independence.
             </p>

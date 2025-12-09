@@ -51,7 +51,7 @@ export default function SavedItemsPage() {
   };
 
   const generateWhatsAppMessage = () => {
-    const message = `Hi! I'm interested in the following products from TRXSolar:\n\n${wishlistItems
+    const message = `Hi! I'm interested in the following products from VCSolar:\n\n${wishlistItems
       .map((product, index) => `${index + 1}. ${product.name} by ${product.brand} - ₦${product.price.toLocaleString('en-NG')}`)
       .join('\n')}\n\nCould you provide a quote for these items?`;
 
@@ -69,13 +69,13 @@ export default function SavedItemsPage() {
 
   const generateEmailLink = () => {
     const subject = `Quote Request for ${wishlistItems.length} Saved Items`;
-    const body = `Hello TRX Solar Team,\n\nI am interested in receiving a quote for the following products:\n\n${wishlistItems
+    const body = `Hello VC Solar Team,\n\nI am interested in receiving a quote for the following products:\n\n${wishlistItems
       .map((product, index) => `${index + 1}. ${product.name} by ${product.brand}\n   Price: ₦${product.price.toLocaleString('en-NG')}\n   Category: ${product.category.replace('-', ' ')}`)
       .join('\n\n')}\n\nPlease provide your best quote for these items.\n\nThank you!`;
 
     const encodedSubject = encodeURIComponent(subject);
     const encodedBody = encodeURIComponent(body);
-    return `mailto:sales@trxsolar.com?subject=${encodedSubject}&body=${encodedBody}`;
+    return `mailto:sales@vcsolar.com?subject=${encodedSubject}&body=${encodedBody}`;
   };
 
   if (loading) {
