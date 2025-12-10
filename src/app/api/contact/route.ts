@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
-import { sendContactNotification, sendContactConfirmation } from '@/lib/email';
+import { sendContactNotification, sendContactConfirmation, sendQuoteRequestNotification, sendQuoteRequestConfirmation, QuoteRequestData } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, phone, message } = body;
+    const { name, email, phone, message, projectType, timeframe, address, notes } = body;
 
     // Validate required fields
     if (!name || !email || !message) {
@@ -14,6 +14,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // CRITICAL: Check if this is a quote request based on technical fields
+    const isQuoteRequest = projectType || timeframe || address;
 
     let contactId = null;
 
@@ -34,11 +37,31 @@ export async function POST(request: NextRequest) {
     }
 
     // Try to send notification emails (non-blocking)
+    // ROUTE TO CORRECT EMAIL TEMPLATES based on form data
     try {
-      await Promise.all([
-        sendContactNotification({ name, email, phone, message }),
-        sendContactConfirmation({ name, email, phone, message })
-      ]);
+      if (isQuoteRequest) {
+        // Use Quote Request Email Templates for high-value leads
+        const quoteData: QuoteRequestData = {
+          name,
+          email,
+          phone: phone || '',
+          projectType: (projectType as 'residential' | 'commercial' | 'off-grid') || 'residential',
+          timeframe: timeframe || 'Not specified',
+          address: address || 'Not specified',
+          notes: notes || message
+        };
+
+        await Promise.all([
+          sendQuoteRequestNotification(quoteData),
+          sendQuoteRequestConfirmation(quoteData)
+        ]);
+      } else {
+        // Use General Inquiry Templates
+        await Promise.all([
+          sendContactNotification({ name, email, phone, message }),
+          sendContactConfirmation({ name, email, phone, message })
+        ]);
+      }
     } catch (emailError) {
       console.warn('Email service error (non-blocking):', emailError);
     }
