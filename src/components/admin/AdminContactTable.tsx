@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Contact } from '@/types';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import MessageViewerModal from '@/components/ui/MessageViewerModal';
 
 interface AdminContactTableProps {
   contacts: Contact[];
@@ -16,7 +17,7 @@ export default function AdminContactTable({
   onDelete,
 }: AdminContactTableProps) {
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
-  const [expandedMessage, setExpandedMessage] = useState<number | null>(null);
+  const [viewingContact, setViewingContact] = useState<Contact | null>(null);
 
   const handleDeleteClick = (contactId: number) => {
     setDeleteConfirmId(contactId);
@@ -31,23 +32,12 @@ export default function AdminContactTable({
     setDeleteConfirmId(null);
   };
 
-  const truncateMessage = (message: string, maxLength: number = 50) => {
-    return message.length > maxLength ? message.substring(0, maxLength) + '...' : message;
+  const handleViewMessage = (contact: Contact) => {
+    setViewingContact(contact);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'new':
-        return 'bg-blue-100 text-blue-800';
-      case 'in_progress':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'resolved':
-        return 'bg-green-100 text-green-800';
-      case 'closed':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const handleCloseModal = () => {
+    setViewingContact(null);
   };
 
   const formatDate = (dateString: string) => {
@@ -71,8 +61,6 @@ export default function AdminContactTable({
               <th className="text-left px-md py-sm text-body font-semibold text-text-primary">Name</th>
               <th className="text-left px-md py-sm text-body font-semibold text-text-primary">Email</th>
               <th className="text-left px-md py-sm text-body font-semibold text-text-primary">Phone</th>
-              <th className="text-left px-md py-sm text-body font-semibold text-text-primary">Message</th>
-              <th className="text-center px-md py-sm text-body font-semibold text-text-primary">Status</th>
               <th className="text-left px-md py-sm text-body font-semibold text-text-primary">Date</th>
               <th className="text-center px-md py-sm text-body font-semibold text-text-primary">Actions</th>
             </tr>
@@ -89,32 +77,42 @@ export default function AdminContactTable({
                 <td className="px-md py-sm text-body text-text-secondary">
                   {contact.phone || '-'}
                 </td>
-                <td className="px-md py-sm text-body text-text-secondary max-w-sm">
-                  {truncateMessage(contact.message)}
-                </td>
-                <td className="px-md py-sm text-center">
-                  <select
-                    value={contact.status}
-                    onChange={(e) => onUpdateStatus(contact.id, e.target.value)}
-                    className={`px-sm py-xs rounded text-caption font-medium ${getStatusColor(contact.status)}`}
-                  >
-                    <option value="new">New</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed</option>
-                  </select>
-                </td>
                 <td className="px-md py-sm text-body text-text-secondary whitespace-nowrap">
                   {formatDate(contact.created_at.toString())}
                 </td>
                 <td className="px-md py-sm">
                   <div className="flex items-center justify-center gap-xs">
+                    {/* View Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleViewMessage(contact)}
+                      className="w-touch h-touch flex items-center justify-center text-primary hover:bg-primary/10 rounded transition-colors"
+                      aria-label="View message"
+                      title="View message"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
+                      </svg>
+                    </button>
+
                     {/* Delete Button */}
                     <button
                       type="button"
                       onClick={() => handleDeleteClick(contact.id)}
-                      className="w-touch h-touch flex items-center justify-center text-error hover:bg-background rounded transition-colors"
+                      className="w-touch h-touch flex items-center justify-center text-error hover:bg-error/10 rounded transition-colors"
                       aria-label="Delete contact"
+                      title="Delete contact"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
@@ -145,16 +143,6 @@ export default function AdminContactTable({
                 </h3>
                 <p className="text-caption text-text-secondary truncate">{contact.email}</p>
               </div>
-              <select
-                value={contact.status}
-                onChange={(e) => onUpdateStatus(contact.id, e.target.value)}
-                className={`px-sm py-xs rounded text-caption font-medium ${getStatusColor(contact.status)}`}
-              >
-                <option value="new">New</option>
-                <option value="in_progress">In Progress</option>
-                <option value="resolved">Resolved</option>
-                <option value="closed">Closed</option>
-              </select>
             </div>
 
             {/* Phone */}
@@ -165,41 +153,61 @@ export default function AdminContactTable({
               </div>
             )}
 
-            {/* Message */}
-            <div>
-              <p className="text-caption text-text-secondary mb-xs">Message:</p>
-              <p className="text-body text-text-primary whitespace-pre-wrap">
-                {expandedMessage === contact.id ? contact.message : truncateMessage(contact.message, 100)}
-              </p>
-              {contact.message.length > 100 && (
-                <button
-                  type="button"
-                  onClick={() => setExpandedMessage(expandedMessage === contact.id ? null : contact.id)}
-                  className="text-primary text-caption mt-xs hover:underline"
-                >
-                  {expandedMessage === contact.id ? 'Show Less' : 'Read More'}
-                </button>
-              )}
-            </div>
-
             {/* Date */}
             <div className="text-caption text-text-secondary">
               {formatDate(contact.created_at.toString())}
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end pt-sm border-t border-border">
+            <div className="flex gap-sm pt-sm border-t border-border">
+              <button
+                type="button"
+                onClick={() => handleViewMessage(contact)}
+                className="flex-1 px-md py-sm min-h-touch bg-primary text-white font-sans font-semibold hover:bg-primary-dark rounded transition-colors flex items-center justify-center gap-xs"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
+                </svg>
+                View
+              </button>
               <button
                 type="button"
                 onClick={() => handleDeleteClick(contact.id)}
-                className="px-md py-sm min-h-touch text-error hover:bg-error/10 rounded transition-colors"
+                className="w-touch h-touch flex items-center justify-center text-error hover:bg-error/10 rounded transition-colors"
+                aria-label="Delete contact"
               >
-                Delete
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
               </button>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Message Viewer Modal */}
+      <MessageViewerModal
+        isOpen={viewingContact !== null}
+        onClose={handleCloseModal}
+        contact={viewingContact}
+        onUpdateStatus={onUpdateStatus}
+      />
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
