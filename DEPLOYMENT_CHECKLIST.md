@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS admin_users (
 - [x] Resend account created
 - [x] Domain verified: vcsolar.shop
 - [x] DNS records added (DKIM, SPF)
-- [x] API key obtained: `re_RJrxmtn7_9B7zAa8pdWrC2o3R5PNTXfii`
+- [x] API key obtained from Resend dashboard (see .env.local or Vercel environment variables)
 - [ ] Verify domain status in Resend dashboard is "Verified"
 
 ### 5. Environment Variables
@@ -76,8 +76,8 @@ Set these in Vercel Dashboard → Your Project → Settings → Environment Vari
 
 **Required:**
 ```
-RESEND_API_KEY=re_RJrxmtn7_9B7zAa8pdWrC2o3R5PNTXfii
-ADMIN_PASSWORD=*vcsolar*
+RESEND_API_KEY=your_resend_api_key_here
+ADMIN_PASSWORD=your_secure_password_here
 ```
 
 **Auto-populated by Vercel Postgres (don't set manually):**
