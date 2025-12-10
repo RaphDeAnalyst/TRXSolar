@@ -1,37 +1,62 @@
-Claude, completely restructure the Product Details Page (PDP) to eliminate the Add-to-Cart/Quote button and replace it with a direct communication focus.
+Claude, execute a **Global Audit and Refactoring** of all confirmation dialogs, success notifications, error alerts, and full-screen modals across the entire codebase (both client-facing and admin panel). The goal is to enforce **visual consistency, clear hierarchy, and strict adherence** to the established design system.
 
-1. 🖼️ Image Gallery Implementation:
-Convert the main product image area into a functional Image Gallery component.
+### 1. 🎨 Design System Enforcement
 
-The gallery must include a large main viewer and a set of smaller thumbnail selectors below it for viewing multiple images.
+All dialogs, modals, and notifications must be styled using the typography, color palette, and spacing tokens defined in **`design_system.md`**. Key directives include:
 
-2. 🎯 Conversion CTA Refactoring (Dual CTAs):
-Remove the single "Request Quote" button.
+* **Color Palette:** Use the primary accent color (Teal/Turquoise) for the main action button (e.g., "Confirm," "Delete," or "Let's Complete"). Use muted colors (gray/white) for secondary actions or cancel buttons.
+* **Typography:** Maintain the defined font stack and hierarchy for Titles (H2/H3), Body text, and Button labels.
+* **Spacing & Rounding:** Ensure consistent padding, margins, and border-radius across all dialog types.
 
-Implement the following two adjacent buttons near the price:
+---
 
-Primary CTA (WhatsApp): Use the Teal/Turquoise background. Text: "Chat Now for a Quote." Must use a pre-filled message including the product name and details.
+### 2. 🗂️ Component Standardization (The Hierarchy)
 
-Secondary CTA (Email): Use an Outlined/Ghost style with Teal text/border. Text: "Email Inquiry." Must use a pre-filled subject line with the product name and details.
+Standardize the structure for the three main types of informational overlays:
 
-3. 📑 Trust & Data:
-Place a highly visible Warranty Badge or text (e.g., "25-Year Warranty") prominently near the price.
+#### A. Confirmation Dialogs (Example: Delete Action)
 
-Ensure the technical specification table is expanded to include essential solar data like Dimensions, Weight, and Certifications.
+These are for preventing accidental actions.
 
-Add a button/link for "Download Data Sheet (PDF)".
+* **Structure:** Must be modal (overlaying the page), centered, and compact.
+* **Content Hierarchy:**
+    * **Title:** Clear question or command (e.g., "**Delete Product?**").
+    * **Body:** Contextual warning (e.g., "Are you sure you want to delete this panel? This action cannot be undone.").
+* **Button Priority:**
+    * **Primary Button (Right):** The final action (e.g., "**Delete**"). Should use a color that reflects the severity (e.g., **Red** for deletion, or the accent color for positive completion).
+    * **Secondary Button (Left):** The cancel action (e.g., "Cancel," or "No"). Should be an outlined/ghost style.
+* **Crucial Integration:** Ensure this design is applied to the **Product Deletion Confirmation Modal** in the Admin Panel.
 
-4. 🔗 Related Products Logic and Layout (Final Directive):
-The "Related Products" section must display exactly 4 product cards and must adhere to the final, comprehensive responsive grid rules to ensure optimal viewing:
+#### B. Success/Error Notifications (Toasts)
 
-Mobile/Small Tablet (< 768px): The products must display in 2 columns (sm:grid-cols-2).
+These are non-blocking messages appearing briefly after an action is completed.
 
-Desktop/Large Screens (>= 1024px): The products must display in a single row of 4 columns (lg:grid-cols-4).
+* **Placement:** Fixed position, typically in the top-right or bottom-right corner.
+* **Visual Indicators:** Use small icons and clear background colors:
+    * **Success:** Green background/icon (e.g., "Product Saved Successfully!").
+    * **Error:** Red background/icon (e.g., "Image Upload Failed.").
 
-Data Fallback Logic:
+#### C. Full-Screen Modals (Example: Lightbox/Image Gallery)
 
-Tier 1 (Priority: Brand Loyalty): Attempt to display up to 4 other products that share the exact same Brand as the current product. These must belong to the same Category.
+These are for complex content like the planned PDP image Lightbox.
 
-Tier 2 (Fallback: Compatibility): If the available products from the same Brand are fewer than 4, fill the remaining slots with products from the same Category that have the closest technical specification (e.g., nearest wattage or nearest capacity) to the current product, regardless of brand.
+* **Structure:** Should cover the entire viewport.
+* **Focus:** Maintain a clear, highly visible "Close" button (X icon) in the corner.
 
-Randomization: If multiple products qualify for a slot in Tier 2, select them randomly.
+---
+
+### 3. 🌐 Global Codebase Audit
+
+Perform a full audit and update of the following known locations to ensure they use the new standardized components:
+
+* **Admin Panel:**
+    * Product Deletion Confirmation (Crucial).
+    * Product Save Success/Failure Notifications.
+    * Customer Deletion Confirmation (Crucial)	
+* **Client Side:**
+    * Form Submission Success/Failure (Contact Page).
+    * Wishlist/Saved Item Notifications (e.g., "Item Added to Saved List!").
+    * PDP Image Gallery **Lightbox Modal** (ensure consistent look for the close button and background overlay).
+
+
+Even locations I do not list out, do a full audit and discover them

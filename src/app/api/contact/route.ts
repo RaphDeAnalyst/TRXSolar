@@ -15,23 +15,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Save to database
-    const result = await sql`
-      INSERT INTO contacts (name, email, phone, message, status)
-      VALUES (${name}, ${email}, ${phone || null}, ${message}, 'new')
-      RETURNING id
-    `;
+    let contactId = null;
 
-    // Send notification emails
-    await Promise.all([
-      sendContactNotification({ name, email, phone, message }),
-      sendContactConfirmation({ name, email, phone, message })
-    ]);
+    // Try to save to database if configured
+    if (process.env.POSTGRES_URL) {
+      try {
+        const result = await sql`
+          INSERT INTO contacts (name, email, phone, message, status)
+          VALUES (${name}, ${email}, ${phone || null}, ${message}, 'new')
+          RETURNING id
+        `;
+        contactId = result.rows[0].id;
+      } catch (dbError) {
+        console.warn('Database not available, continuing without saving:', dbError);
+      }
+    } else {
+      console.log('Database not configured. Contact form data:', { name, email, phone, message });
+    }
+
+    // Try to send notification emails (non-blocking)
+    try {
+      await Promise.all([
+        sendContactNotification({ name, email, phone, message }),
+        sendContactConfirmation({ name, email, phone, message })
+      ]);
+    } catch (emailError) {
+      console.warn('Email service error (non-blocking):', emailError);
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Contact form submitted successfully',
-      id: result.rows[0].id
+      id: contactId
     });
   } catch (error) {
     console.error('Contact form error:', error);

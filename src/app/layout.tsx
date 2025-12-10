@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import ConditionalLayout from '@/components/ConditionalLayout';
+import { ToastProvider } from '@/components/contexts/ToastContext';
+import ToastContainer from '@/components/ui/ToastContainer';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -21,7 +23,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body>
-        <ConditionalLayout>{children}</ConditionalLayout>
+        <ToastProvider>
+          <ConditionalLayout>{children}</ConditionalLayout>
+          <ToastContainer />
+        </ToastProvider>
       </body>
     </html>
   );

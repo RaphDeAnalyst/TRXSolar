@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Product } from '@/lib/types';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 interface AdminProductTableProps {
   products: Product[];
@@ -216,33 +217,16 @@ export default function AdminProductTable({
         ))}
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {deleteConfirmId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-md">
-          <div className="bg-white rounded-lg max-w-md w-full p-lg space-y-md">
-            <h3 className="text-h3 font-display font-semibold text-text-primary">Confirm Delete</h3>
-            <p className="text-body text-text-secondary">
-              Are you sure you want to delete this product? This action cannot be undone.
-            </p>
-            <div className="flex gap-sm">
-              <button
-                type="button"
-                onClick={handleCancelDelete}
-                className="flex-1 px-md py-sm min-h-touch bg-background text-text-primary font-sans font-semibold rounded hover:bg-border transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => handleConfirmDelete(deleteConfirmId)}
-                className="flex-1 px-md py-sm min-h-touch bg-error text-white font-sans font-semibold rounded hover:opacity-90 transition-opacity"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirmId !== null}
+        onClose={handleCancelDelete}
+        onConfirm={() => handleConfirmDelete(deleteConfirmId!)}
+        title="Delete Product?"
+        message="Are you sure you want to delete this product? This action cannot be undone."
+        confirmText="Delete"
+        confirmVariant="danger"
+      />
     </>
   );
 }

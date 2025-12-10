@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Contact } from '@/types';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 interface AdminContactTableProps {
   contacts: Contact[];
@@ -200,33 +201,16 @@ export default function AdminContactTable({
         ))}
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {deleteConfirmId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-sm bg-black/50 backdrop-blur-sm">
-          <div className="bg-surface border border-border rounded-lg shadow-2xl max-w-md w-full p-lg">
-            <h3 className="text-h3 font-bold text-text-primary mb-md">Confirm Delete</h3>
-            <p className="text-body text-text-secondary mb-lg">
-              Are you sure you want to delete this contact? This action cannot be undone.
-            </p>
-            <div className="flex justify-end gap-sm">
-              <button
-                type="button"
-                onClick={handleCancelDelete}
-                className="px-lg py-sm min-h-touch text-text-secondary hover:text-text-primary hover:bg-background rounded transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => handleConfirmDelete(deleteConfirmId)}
-                className="px-lg py-sm min-h-touch bg-error text-white hover:bg-error/90 rounded transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirmId !== null}
+        onClose={handleCancelDelete}
+        onConfirm={() => handleConfirmDelete(deleteConfirmId!)}
+        title="Delete Contact?"
+        message="Are you sure you want to delete this contact? This action cannot be undone."
+        confirmText="Delete"
+        confirmVariant="danger"
+      />
     </>
   );
 }

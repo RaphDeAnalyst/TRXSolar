@@ -8,6 +8,7 @@ import AdminProductTable from '@/components/admin/AdminProductTable';
 import AdminProductForm from '@/components/admin/AdminProductForm';
 import AdminContactTable from '@/components/admin/AdminContactTable';
 import { generateSKU } from '@/lib/admin/skuGenerator';
+import { useToast } from '@/components/contexts/ToastContext';
 
 // Session management constants
 const ADMIN_SESSION_KEY = 'vcsolar_admin_session';
@@ -19,6 +20,7 @@ interface AdminSession {
 }
 
 export default function AdminPage() {
+  const { showToast } = useToast();
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
@@ -113,10 +115,16 @@ export default function AdminPage() {
         console.log('Login successful. Session will expire in 7 days.');
       } catch (error) {
         console.error('Error storing session:', error);
-        alert('Error creating session. Please try again.');
+        showToast({
+          type: 'error',
+          message: 'Error creating session. Please try again.'
+        });
       }
     } else {
-      alert('Incorrect password');
+      showToast({
+        type: 'error',
+        message: 'Incorrect password'
+      });
       setPassword('');
     }
   };
@@ -149,7 +157,10 @@ export default function AdminPage() {
   const handleDelete = (productId: string) => {
     setProducts((prev) => prev.filter((p) => p.id !== productId));
     // In a real app, this would make an API call to delete from database
-    alert('Product deleted successfully! (Note: This is a demo - changes are not persisted)');
+    showToast({
+      type: 'success',
+      message: 'Product deleted successfully! (Note: This is a demo - changes are not persisted)'
+    });
   };
 
   const handleToggleFeatured = (productId: string, currentStatus: boolean) => {
@@ -165,7 +176,10 @@ export default function AdminPage() {
       setProducts((prev) =>
         prev.map((p) => (p.id === editingProduct.id ? { ...p, ...productData } : p))
       );
-      alert('Product updated successfully! (Note: This is a demo - changes are not persisted)');
+      showToast({
+        type: 'success',
+        message: 'Product updated successfully! (Note: This is a demo - changes are not persisted)'
+      });
     } else {
       // Create new product with auto-generated SKU
       try {
@@ -183,9 +197,16 @@ export default function AdminPage() {
           createdAt: new Date().toISOString(),
         };
         setProducts((prev) => [...prev, newProduct]);
-        alert(`Product created successfully with SKU: ${sku} (Note: This is a demo - changes are not persisted)`);
+        showToast({
+          type: 'success',
+          message: `Product created with SKU: ${sku}`,
+          duration: 7000
+        });
       } catch (error) {
-        alert(`Error creating product: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        showToast({
+          type: 'error',
+          message: `Error creating product: ${error instanceof Error ? error.message : 'Unknown error'}`
+        });
         return;
       }
     }
@@ -217,11 +238,17 @@ export default function AdminPage() {
           c.id === contactId ? { ...c, status: status as Contact['status'] } : c
         ));
       } else {
-        alert('Failed to update contact status');
+        showToast({
+          type: 'error',
+          message: 'Failed to update contact status'
+        });
       }
     } catch (error) {
       console.error('Failed to update status:', error);
-      alert('Failed to update contact status');
+      showToast({
+        type: 'error',
+        message: 'Failed to update contact status'
+      });
     }
   };
 
@@ -238,11 +265,17 @@ export default function AdminPage() {
       if (data.success) {
         setContacts(prev => prev.filter(c => c.id !== contactId));
       } else {
-        alert('Failed to delete contact');
+        showToast({
+          type: 'error',
+          message: 'Failed to delete contact'
+        });
       }
     } catch (error) {
       console.error('Failed to delete contact:', error);
-      alert('Failed to delete contact');
+      showToast({
+        type: 'error',
+        message: 'Failed to delete contact'
+      });
     }
   };
 

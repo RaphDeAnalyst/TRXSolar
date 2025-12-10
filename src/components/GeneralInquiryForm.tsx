@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useToast } from '@/components/contexts/ToastContext';
 
 // Reuse country codes (abbreviated list)
 const COUNTRY_CODES = [
@@ -28,6 +29,7 @@ interface GeneralInquiryFormData {
 }
 
 export default function GeneralInquiryForm() {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState<GeneralInquiryFormData>({
     fullName: '',
     email: '',
@@ -37,9 +39,7 @@ export default function GeneralInquiryForm() {
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof GeneralInquiryFormData, string>>>({});
-  const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState('');
 
   const updateFormData = (field: keyof GeneralInquiryFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -73,7 +73,6 @@ export default function GeneralInquiryForm() {
     }
 
     setIsSubmitting(true);
-    setSubmitError('');
 
     try {
       const payload = {
@@ -95,9 +94,11 @@ export default function GeneralInquiryForm() {
         throw new Error(data.error || 'Failed to submit form');
       }
 
-      // Show success message
-      setSubmitted(true);
-      setTimeout(() => setSubmitted(false), 5000);
+      // Show success toast
+      showToast({
+        type: 'success',
+        message: "Thank you for your message. We'll get back to you soon!"
+      });
 
       // Reset form
       setFormData({
@@ -108,7 +109,10 @@ export default function GeneralInquiryForm() {
         message: '',
       });
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
+      showToast({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Something went wrong. Please try again.'
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -116,19 +120,6 @@ export default function GeneralInquiryForm() {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      {submitted && (
-        <div className="bg-success/10 border border-success text-success p-md mb-lg rounded">
-          <p className="font-medium">
-            Thank you for your message. We'll get back to you soon!
-          </p>
-        </div>
-      )}
-
-      {submitError && (
-        <div className="bg-error/10 border border-error text-error p-md mb-lg rounded">
-          <p className="font-medium">{submitError}</p>
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} className="bg-surface border border-border rounded-lg p-lg md:p-xl shadow-md">
         <div className="space-y-lg">

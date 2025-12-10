@@ -71,9 +71,29 @@ const config: Config = {
           '0%': { opacity: '0', transform: 'translateY(1rem)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        slideInRight: {
+          '0%': { transform: 'translateX(100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        slideOutRight: {
+          '0%': { transform: 'translateX(0)', opacity: '1' },
+          '100%': { transform: 'translateX(100%)', opacity: '0' },
+        },
+        modalEnter: {
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        backdropFade: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
       },
       animation: {
         fadeIn: 'fadeIn 0.3s ease-out',
+        'slide-in-right': 'slideInRight 0.3s ease-out',
+        'slide-out-right': 'slideOutRight 0.2s ease-in',
+        'modal-enter': 'modalEnter 0.3s ease-out',
+        'backdrop-fade': 'backdropFade 0.2s ease-out',
       },
     },
   },

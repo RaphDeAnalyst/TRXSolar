@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useToast } from '@/components/contexts/ToastContext';
 
 type FormData = {
   projectType: 'residential' | 'commercial' | 'off-grid' | '';
@@ -14,6 +15,7 @@ type FormData = {
 };
 
 export default function QuotePage() {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState<FormData>({
     projectType: '',
     timeframe: '',
@@ -74,10 +76,13 @@ export default function QuotePage() {
         name: formData.fullName,
         email: formData.email,
         phone: formData.phone,
-        message: `Project Type: ${formData.projectType}\nInstallation Timeframe: ${formData.timeframe}\nInstallation Address: ${formData.address}\n\nAdditional Notes:\n${formData.notes || 'None'}`
+        projectType: formData.projectType,
+        timeframe: formData.timeframe,
+        address: formData.address,
+        notes: formData.notes
       };
 
-      const response = await fetch('/api/contact', {
+      const response = await fetch('/api/quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -93,7 +98,11 @@ export default function QuotePage() {
       setShowSummary(false);
 
       // Show success message
-      alert('Thank you! Your quote request has been submitted. We will contact you shortly.');
+      showToast({
+        type: 'success',
+        message: 'Thank you! Your quote request has been submitted. We will contact you shortly.',
+        duration: 6000
+      });
 
       // Reset form
       setFormData({

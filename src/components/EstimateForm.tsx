@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useToast } from '@/components/contexts/ToastContext';
 
 // Reuse country codes from contact page
 const COUNTRY_CODES = [
@@ -31,6 +32,7 @@ interface EstimateFormData {
 }
 
 export default function EstimateForm() {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState<EstimateFormData>({
     projectType: '',
     address: '',
@@ -43,9 +45,7 @@ export default function EstimateForm() {
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof EstimateFormData, string>>>({});
-  const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState('');
 
   const updateFormData = (field: keyof EstimateFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -80,7 +80,6 @@ export default function EstimateForm() {
     }
 
     setIsSubmitting(true);
-    setSubmitError('');
 
     try {
       // Transform form data to API payload format
@@ -103,9 +102,11 @@ export default function EstimateForm() {
         throw new Error(data.error || 'Failed to submit form');
       }
 
-      // Show success message
-      setSubmitted(true);
-      setTimeout(() => setSubmitted(false), 5000);
+      // Show success toast
+      showToast({
+        type: 'success',
+        message: "Thank you! We'll prepare your solar estimate and contact you shortly."
+      });
 
       // Reset form
       setFormData({
@@ -119,7 +120,10 @@ export default function EstimateForm() {
         notes: '',
       });
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
+      showToast({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Something went wrong. Please try again.'
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -127,20 +131,6 @@ export default function EstimateForm() {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      {submitted && (
-        <div className="bg-success/10 border border-success text-success p-md mb-lg rounded">
-          <p className="font-medium">
-            Thank you! We'll prepare your solar estimate and contact you shortly.
-          </p>
-        </div>
-      )}
-
-      {submitError && (
-        <div className="bg-error/10 border border-error text-error p-md mb-lg rounded">
-          <p className="font-medium">{submitError}</p>
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="bg-surface border border-border rounded-lg p-lg md:p-xl shadow-md">
         <div className="space-y-lg">
           {/* Project Type */}

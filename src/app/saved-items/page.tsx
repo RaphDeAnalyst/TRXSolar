@@ -6,10 +6,12 @@ import ProductCard from '@/components/ProductCard';
 import { getWishlistItems, clearWishlist } from '@/lib/wishlist';
 import { Product } from '@/lib/types';
 import productsData from '@/data/products.json';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 export default function SavedItemsPage() {
   const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   useEffect(() => {
     loadWishlistProducts();
@@ -45,9 +47,12 @@ export default function SavedItemsPage() {
   };
 
   const handleClearAll = () => {
-    if (window.confirm('Are you sure you want to remove all saved items? This action cannot be undone.')) {
-      clearWishlist();
-    }
+    setShowClearConfirm(true);
+  };
+
+  const handleConfirmClear = () => {
+    clearWishlist();
+    setShowClearConfirm(false);
   };
 
   const generateWhatsAppMessage = () => {
@@ -199,6 +204,17 @@ export default function SavedItemsPage() {
           </div>
         )}
       </div>
+
+      {/* Confirm Clear All Dialog */}
+      <ConfirmDialog
+        isOpen={showClearConfirm}
+        onClose={() => setShowClearConfirm(false)}
+        onConfirm={handleConfirmClear}
+        title="Clear All Saved Items?"
+        message="Are you sure you want to remove all saved items? This action cannot be undone."
+        confirmText="Clear All"
+        confirmVariant="danger"
+      />
     </div>
   );
 }
