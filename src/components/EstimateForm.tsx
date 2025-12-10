@@ -212,12 +212,12 @@ export default function EstimateForm() {
             <label className="block text-body text-text-primary font-medium mb-sm">
               Phone Number <span className="text-primary">*</span>
             </label>
-            <div className="flex gap-sm">
+            <div className="flex flex-col md:flex-row gap-sm">
               <select
                 value={formData.countryCode}
                 onChange={(e) => updateFormData('countryCode', e.target.value)}
                 aria-label="Country code"
-                className="w-40 px-sm py-sm border border-border rounded focus:border-primary focus:outline-none"
+                className="w-full md:w-40 px-sm py-sm border border-border rounded focus:border-primary focus:outline-none"
               >
                 {COUNTRY_CODES.map((country) => (
                   <option key={`${country.iso}-${country.code}`} value={country.code}>
@@ -229,7 +229,7 @@ export default function EstimateForm() {
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => updateFormData('phone', e.target.value)}
-                className={`flex-1 px-md py-sm border rounded focus:outline-none focus:border-primary ${
+                className={`w-full md:flex-1 px-md py-sm border rounded focus:outline-none focus:border-primary ${
                   errors.phone ? 'border-error' : 'border-border'
                 }`}
                 placeholder="Phone number"
