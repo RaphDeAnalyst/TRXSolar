@@ -32,6 +32,7 @@ export default function AdminPage() {
 
   // Contact management state
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [isLoadingContacts, setIsLoadingContacts] = useState(false);
   const [activeTab, setActiveTab] = useState<'products' | 'contacts'>('products');
   const [contactSearch, setContactSearch] = useState('');
   const [contactStatusFilter, setContactStatusFilter] = useState('all');
@@ -157,6 +158,8 @@ export default function AdminPage() {
     console.log('📋 [ADMIN] Timestamp:', new Date().toISOString());
     console.log('📋 [ADMIN] Using password:', ADMIN_PASSWORD.substring(0, 5) + '...');
 
+    setIsLoadingContacts(true);
+
     try {
       console.log('📋 [ADMIN] Making fetch request to /api/admin/contacts');
 
@@ -208,6 +211,8 @@ export default function AdminPage() {
         type: 'error',
         message: 'Failed to load contacts: ' + (error instanceof Error ? error.message : 'Network error')
       });
+    } finally {
+      setIsLoadingContacts(false);
     }
 
     console.log('📋 [ADMIN] ========================================');
@@ -856,11 +861,12 @@ export default function AdminPage() {
             </div>
 
             {/* Contacts Table */}
-            {filteredContacts.length > 0 ? (
+            {isLoadingContacts || filteredContacts.length > 0 ? (
               <AdminContactTable
                 contacts={filteredContacts}
                 onUpdateStatus={handleUpdateStatus}
                 onDelete={handleDeleteContact}
+                isLoading={isLoadingContacts}
               />
             ) : (
               <div className="bg-surface border border-border rounded-lg p-xl text-center">

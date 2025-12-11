@@ -4,17 +4,20 @@ import { useState, useEffect } from 'react';
 import { Contact } from '@/types';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import MessageViewerModal from '@/components/ui/MessageViewerModal';
+import { TableRowSkeleton, MobileContactCardSkeleton } from '@/components/skeletons/TableRowSkeleton';
 
 interface AdminContactTableProps {
   contacts: Contact[];
   onUpdateStatus: (contactId: number, status: string) => void;
   onDelete: (contactId: number) => void;
+  isLoading?: boolean;
 }
 
 export default function AdminContactTable({
   contacts,
   onUpdateStatus,
   onDelete,
+  isLoading = false,
 }: AdminContactTableProps) {
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [viewingContact, setViewingContact] = useState<Contact | null>(null);
@@ -73,7 +76,16 @@ export default function AdminContactTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {contacts.map((contact) => (
+            {/* Loading State: Render Skeleton Rows */}
+            {isLoading ? (
+              <>
+                {[...Array(7)].map((_, i) => (
+                  <TableRowSkeleton key={i} />
+                ))}
+              </>
+            ) : (
+              /* Success State: Render actual contact rows */
+              contacts.map((contact) => (
               <tr key={contact.id} className="hover:bg-background transition-colors">
                 <td className="px-md py-sm text-body text-text-primary font-medium">
                   {contact.name}
@@ -133,14 +145,24 @@ export default function AdminContactTable({
                   </div>
                 </td>
               </tr>
-            ))}
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
       {/* Mobile Card View */}
       <div className="md:hidden space-y-md">
-        {contacts.map((contact) => (
+        {/* Loading State: Render Skeleton Cards */}
+        {isLoading ? (
+          <>
+            {[...Array(5)].map((_, i) => (
+              <MobileContactCardSkeleton key={i} />
+            ))}
+          </>
+        ) : (
+          /* Success State: Render actual contact cards */
+          contacts.map((contact) => (
           <div key={contact.id} className="bg-surface border border-border rounded p-md space-y-sm">
             {/* Contact Header */}
             <div className="flex items-start justify-between gap-sm">
@@ -205,7 +227,8 @@ export default function AdminContactTable({
               </button>
             </div>
           </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Message Viewer Modal */}

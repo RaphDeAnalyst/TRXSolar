@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
+import ProductCardSkeleton from '@/components/skeletons/ProductCardSkeleton';
 import { getWishlistItems, clearWishlist } from '@/lib/wishlist';
 import { Product } from '@/lib/types';
 import productsData from '@/data/products.json';
@@ -13,10 +14,9 @@ export default function SavedItemsPage() {
   const [loading, setLoading] = useState(true);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [dbProducts, setDbProducts] = useState<Product[]>([]);
+  const [dbProductsLoaded, setDbProductsLoaded] = useState(false);
 
   useEffect(() => {
-    loadWishlistProducts();
-
     // Listen for wishlist updates
     const handleWishlistUpdate = () => {
       loadWishlistProducts();
@@ -53,6 +53,8 @@ export default function SavedItemsPage() {
         }
       } catch (error) {
         console.error('[Saved Items] ❌ Failed to load database products:', error);
+      } finally {
+        setDbProductsLoaded(true);
       }
     };
 
@@ -60,6 +62,11 @@ export default function SavedItemsPage() {
   }, []);
 
   const loadWishlistProducts = useCallback(() => {
+    // Don't load wishlist until database products have been fetched
+    if (!dbProductsLoaded) {
+      return;
+    }
+
     const wishlistIds = getWishlistItems();
 
     // Get all products - merge JSON and database products
@@ -85,7 +92,7 @@ export default function SavedItemsPage() {
 
     setWishlistItems(savedProducts);
     setLoading(false);
-  }, [dbProducts]);
+  }, [dbProducts, dbProductsLoaded]);
 
   // Reload wishlist when database products are loaded
   useEffect(() => {
@@ -129,10 +136,51 @@ export default function SavedItemsPage() {
     return `mailto:sales@vcsolar.com?subject=${encodedSubject}&body=${encodedBody}`;
   };
 
+  // Loading State: Render Skeleton UI
   if (loading) {
     return (
-      <div className="w-full min-h-screen bg-background flex items-center justify-center">
-        <p className="text-text-secondary">Loading your saved items...</p>
+      <div className="w-full min-h-screen bg-background">
+        {/* Warning Banner - Shown even during loading */}
+        <div className="bg-warning/10 border-b-2 border-warning">
+          <div className="max-w-7xl mx-auto px-sm py-md">
+            <div className="flex items-start gap-sm">
+              <svg className="w-6 h-6 text-warning flex-shrink-0 mt-xs" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <div>
+                <p className="text-body font-medium text-text-primary">
+                  <strong>Important:</strong> Your saved items are stored only in this browser.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Page Content with Skeleton */}
+        <div className="max-w-7xl mx-auto px-sm py-lg">
+          {/* Page Header */}
+          <div className="mb-xl">
+            <h1 className="text-h1 text-text-primary font-bold mb-sm">Saved Items</h1>
+            <div className="h-6 w-48 bg-gray-200 rounded animate-pulse" />
+          </div>
+
+          {/* Skeleton Product Grid */}
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-lg"
+            role="status"
+            aria-live="polite"
+            aria-label="Loading saved items"
+          >
+            {/* Show 4 skeletons (responsive) */}
+            {[...Array(4)].map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

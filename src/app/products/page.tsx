@@ -502,7 +502,7 @@ function ProductsPageContent() {
             </div>
 
             {/* Product Grid */}
-            <ProductGrid products={paginatedProducts} />
+            <ProductGrid products={paginatedProducts} isLoading={isLoadingProducts} />
 
             {/* Pagination */}
             <Pagination
