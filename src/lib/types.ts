@@ -4,6 +4,17 @@ export interface ProductSpecs {
   [key: string]: string | number;
 }
 
+export interface MediaFile {
+  url: string;
+  type: 'image' | 'video';
+  public_id: string;
+  thumbnail_url?: string;
+  order: number;
+  width?: number;
+  height?: number;
+  format?: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -12,6 +23,7 @@ export interface Product {
   price: number;
   image: string;
   gallery?: string[];
+  media?: MediaFile[];
   specs: ProductSpecs;
   description: string;
   featured?: boolean;

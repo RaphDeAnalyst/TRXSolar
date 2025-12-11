@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, description, price, image_url, category, specifications } = body;
+    const { id, name, brand, description, price, image, image_url, category, specifications, specs, featured, media } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -44,9 +44,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Use media if available, otherwise fall back to image/image_url
+    const finalImage = image_url || image || (media && media[0]?.url) || null;
+    const finalSpecs = specs || specifications || {};
+    const finalMedia = media || [];
+
     const result = await sql`
-      INSERT INTO products (name, description, price, image_url, category, specifications)
-      VALUES (${name}, ${description || null}, ${price || null}, ${image_url || null}, ${category || null}, ${JSON.stringify(specifications) || null})
+      INSERT INTO products (id, name, brand, description, price, image, category, specs, featured, media)
+      VALUES (
+        ${id || name.toLowerCase().replace(/\s+/g, '-')},
+        ${name},
+        ${brand || null},
+        ${description || null},
+        ${price || null},
+        ${finalImage},
+        ${category || null},
+        ${JSON.stringify(finalSpecs)},
+        ${featured || false},
+        ${JSON.stringify(finalMedia)}
+      )
       RETURNING *
     `;
 

@@ -4,19 +4,61 @@ import ImageCarousel from '@/components/ImageCarousel';
 import productsData from '@/data/products.json';
 import { Product } from '@/lib/types';
 
-export default function Home() {
-  // Get featured products from all categories
+async function getProducts() {
+  try {
+    // Fetch from public API
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const response = await fetch(`${baseUrl}/api/products`, {
+      cache: 'no-store' // Always get fresh data
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.products) {
+        return data.products.map((p: any) => ({
+          id: p.id?.toString() || `db-${p.name}`,
+          name: p.name,
+          brand: p.brand || 'Unknown',
+          category: p.category || 'solar-panels',
+          price: parseFloat(p.price) || 0,
+          image: p.image_url || p.image || '/images/placeholder.jpg',
+          media: typeof p.media === 'string' ? JSON.parse(p.media) : (p.media || []),
+          description: p.description || '',
+          specs: typeof p.specs === 'string' ? JSON.parse(p.specs) : (p.specs || {}),
+          featured: p.featured || false,
+        }));
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load database products:', error);
+  }
+  return [];
+}
+
+export default async function Home() {
+  // Get database products
+  const dbProducts = await getProducts();
+
+  // Get featured products from all categories (JSON + database)
   const allProducts: Product[] = [
     ...(productsData['solar-panels'] as Product[]),
     ...(productsData.inverters as Product[]),
     ...(productsData.batteries as Product[]),
+    ...dbProducts
   ];
 
   const featuredProducts = allProducts.filter((p) => p.featured).slice(0, 6);
 
-  // Extract images for carousels
-  const solarPanelImages = productsData['solar-panels'].map((p) => p.image);
-  const inverterImages = productsData.inverters.map((p) => p.image);
+  // Extract images for carousels from database products
+  const solarPanelImages = allProducts
+    .filter(p => p.category === 'solar-panels' && p.image)
+    .map((p) => p.image)
+    .slice(0, 5); // Limit to 5 images for carousel
+
+  const inverterImages = allProducts
+    .filter(p => p.category === 'inverters' && p.image)
+    .map((p) => p.image)
+    .slice(0, 5); // Limit to 5 images for carousel
 
   return (
     <>

@@ -49,18 +49,25 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { name, description, price, image_url, category, specifications } = body;
+    const { name, brand, description, price, image, image_url, category, specifications, specs, featured, media } = body;
+
+    // Use media if available, otherwise fall back to image/image_url
+    const finalImage = image || image_url || (media && media[0]?.url) || null;
+    const finalSpecs = specs || specifications || {};
+    const finalMedia = media || [];
 
     const result = await sql`
       UPDATE products
       SET
         name = ${name},
+        brand = ${brand || null},
         description = ${description || null},
         price = ${price || null},
-        image_url = ${image_url || null},
+        image = ${finalImage},
         category = ${category || null},
-        specifications = ${JSON.stringify(specifications) || null},
-        updated_at = CURRENT_TIMESTAMP
+        specs = ${JSON.stringify(finalSpecs)},
+        featured = ${featured || false},
+        media = ${JSON.stringify(finalMedia)}
       WHERE id = ${id}
       RETURNING *
     `;

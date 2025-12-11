@@ -14,20 +14,47 @@ interface ProductPageProps {
   }>;
 }
 
-export function generateStaticParams() {
-  const allProducts: Product[] = [];
+// Helper function to fetch products from API
+async function fetchAllProducts(): Promise<Product[]> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const response = await fetch(`${baseUrl}/api/products`, {
+      cache: 'no-store',
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.products || [];
+    }
+  } catch (error) {
+    console.error('Failed to fetch products from API:', error);
+  }
+
+  return [];
+}
+
+export async function generateStaticParams() {
+  // Get products from JSON
+  const jsonProducts: Product[] = [];
   Object.values(productsData).forEach((categoryProducts) => {
-    allProducts.push(...(categoryProducts as Product[]));
+    jsonProducts.push(...(categoryProducts as Product[]));
   });
+
+  // Get products from database
+  const dbProducts = await fetchAllProducts();
+
+  // Combine all products
+  const allProducts = [...jsonProducts, ...dbProducts];
+
   return allProducts.map((product) => ({
-    id: product.id,
+    id: product.id.toString(),
   }));
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id } = await params;
 
-  // Find product
+  // Find product in JSON first
   let product: Product | undefined;
 
   for (const [, products] of Object.entries(productsData)) {
@@ -38,15 +65,23 @@ export default async function ProductPage({ params }: ProductPageProps) {
     }
   }
 
+  // If not found in JSON, try database
+  if (!product) {
+    const dbProducts = await fetchAllProducts();
+    product = dbProducts.find((p) => p.id.toString() === id);
+  }
+
   if (!product) {
     notFound();
   }
 
   // Get all products for related products algorithm
-  const allProducts: Product[] = [];
+  const jsonProducts: Product[] = [];
   Object.values(productsData).forEach((categoryProducts) => {
-    allProducts.push(...(categoryProducts as Product[]));
+    jsonProducts.push(...(categoryProducts as Product[]));
   });
+  const dbProducts = await fetchAllProducts();
+  const allProducts = [...jsonProducts, ...dbProducts];
 
   return (
     <div className="w-full">
@@ -73,6 +108,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div>
             <ProductImageGallery
               productName={product.name}
+              media={product.media}
               images={product.gallery || [product.image]}
             />
           </div>

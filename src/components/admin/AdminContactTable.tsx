@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Contact } from '@/types';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import MessageViewerModal from '@/components/ui/MessageViewerModal';
@@ -18,6 +18,12 @@ export default function AdminContactTable({
 }: AdminContactTableProps) {
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [viewingContact, setViewingContact] = useState<Contact | null>(null);
+
+  // Debug logging
+  useEffect(() => {
+    console.log('📊 [ContactTable] Component rendered with contacts:', contacts.length);
+    console.log('📊 [ContactTable] First contact:', contacts[0]);
+  }, [contacts]);
 
   const handleDeleteClick = (contactId: number) => {
     setDeleteConfirmId(contactId);
@@ -40,8 +46,9 @@ export default function AdminContactTable({
     setViewingContact(null);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', {
+  const formatDate = (dateValue: Date | string) => {
+    const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+    return date.toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -78,7 +85,7 @@ export default function AdminContactTable({
                   {contact.phone || '-'}
                 </td>
                 <td className="px-md py-sm text-body text-text-secondary whitespace-nowrap">
-                  {formatDate(contact.created_at.toString())}
+                  {formatDate(contact.created_at)}
                 </td>
                 <td className="px-md py-sm">
                   <div className="flex items-center justify-center gap-xs">
@@ -155,7 +162,7 @@ export default function AdminContactTable({
 
             {/* Date */}
             <div className="text-caption text-text-secondary">
-              {formatDate(contact.created_at.toString())}
+              {formatDate(contact.created_at)}
             </div>
 
             {/* Actions */}

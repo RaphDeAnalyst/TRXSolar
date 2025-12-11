@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import ProductGrid from '@/components/ProductGrid';
+import Pagination from '@/components/Pagination';
 import productsData from '@/data/products.json';
 import { Product, ProductCategory } from '@/lib/types';
 
@@ -34,15 +35,47 @@ function ProductsPageContent() {
   const [brands, setBrands] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(true);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [dbProducts, setDbProducts] = useState<Product[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PRODUCTS_PER_PAGE = 12;
 
-  // Get all products
+  // Fetch products from database on mount
+  useEffect(() => {
+    const fetchDatabaseProducts = async () => {
+      try {
+        const response = await fetch('/api/products');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.products) {
+            // The API already transforms the products properly, so we can use them directly
+            setDbProducts(data.products);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load database products:', error);
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+
+    fetchDatabaseProducts();
+  }, []);
+
+  // Get all products - merge JSON and database products
   const allProducts = useMemo(() => {
     const products: Product[] = [];
+
+    // Add products from JSON file
     Object.values(productsData).forEach((categoryProducts) => {
       products.push(...(categoryProducts as Product[]));
     });
+
+    // Add products from database
+    products.push(...dbProducts);
+
     return products;
-  }, []);
+  }, [dbProducts]);
 
   // Get unique brands based on selected category (dynamic, category-dependent)
   const uniqueBrands = useMemo(() => {
@@ -79,7 +112,14 @@ function ProductsPageContent() {
     setPriceRange([0, categoryMaxPrice]);
     // Clear brand selections when switching categories to avoid showing irrelevant filters
     setBrands(new Set());
+    // Reset to first page when filters change
+    setCurrentPage(1);
   }, [category, categoryMaxPrice]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [priceRange, brands]);
 
   // Filter products
   const filteredProducts = useMemo(() => {
@@ -100,6 +140,20 @@ function ProductsPageContent() {
 
     return filtered.sort((a, b) => a.price - b.price);
   }, [allProducts, category, priceRange, brands]);
+
+  // Paginate filtered products
+  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    const endIndex = startIndex + PRODUCTS_PER_PAGE;
+    return filteredProducts.slice(startIndex, endIndex);
+  }, [filteredProducts, currentPage, PRODUCTS_PER_PAGE]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of products section
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleBrandToggle = (brand: string) => {
     const newBrands = new Set(brands);
@@ -132,6 +186,9 @@ function ProductsPageContent() {
           <p className="text-body text-text-secondary max-w-3xl">
             Find high-efficiency solar panels, inverters, and batteries for your residential or commercial project.
           </p>
+          {isLoadingProducts && (
+            <p className="text-caption text-primary mt-xs">Loading products from database...</p>
+          )}
         </div>
 
         {/* Mobile Filter Button - Always visible on mobile */}
@@ -263,6 +320,11 @@ function ProductsPageContent() {
                 >
                   Apply Filters ({filteredProducts.length} {filteredProducts.length !== 1 ? 'products' : 'product'})
                 </button>
+                {totalPages > 1 && (
+                  <p className="text-center text-xs text-text-secondary mt-sm">
+                    Results shown across {totalPages} pages
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -402,28 +464,42 @@ function ProductsPageContent() {
           {/* Products Section */}
           <div className="flex-1 min-w-0">
             {/* Filter Summary */}
-            <div className="mb-lg flex flex-wrap gap-sm items-center">
-              <span className="text-caption text-text-secondary">
-                {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
-              </span>
+            <div className="mb-lg flex flex-wrap gap-sm items-center justify-between">
+              <div className="flex flex-wrap gap-sm items-center">
+                <span className="text-caption text-text-secondary">
+                  {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+                  {totalPages > 1 && (
+                    <span className="ml-xs">
+                      (Page {currentPage} of {totalPages})
+                    </span>
+                  )}
+                </span>
 
-              {/* Active Filters - Mobile */}
-              <div className="flex flex-wrap gap-sm md:hidden">
-                {category && (
-                  <button
-                    type="button"
-                    onClick={() => setCategory(null)}
-                    className="text-xs bg-background px-sm py-xs rounded flex items-center gap-xs hover:bg-border"
-                  >
-                    {CATEGORIES.find((c) => c.value === category)?.label}
-                    <span>✕</span>
-                  </button>
-                )}
+                {/* Active Filters - Mobile */}
+                <div className="flex flex-wrap gap-sm md:hidden">
+                  {category && (
+                    <button
+                      type="button"
+                      onClick={() => setCategory(null)}
+                      className="text-xs bg-background px-sm py-xs rounded flex items-center gap-xs hover:bg-border"
+                    >
+                      {CATEGORIES.find((c) => c.value === category)?.label}
+                      <span>✕</span>
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Product Grid */}
-            <ProductGrid products={filteredProducts} />
+            <ProductGrid products={paginatedProducts} />
+
+            {/* Pagination */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
 
             {/* CTA Section */}
             <div className="mt-2xl bg-primary/10 border border-primary/20 rounded-lg p-xl text-center">

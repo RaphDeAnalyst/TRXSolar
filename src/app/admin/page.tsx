@@ -73,30 +73,144 @@ export default function AdminPage() {
   // Load products on mount
   useEffect(() => {
     if (isAuthenticated) {
-      const allProducts: Product[] = [];
-      Object.values(productsData).forEach((categoryProducts) => {
-        allProducts.push(...(categoryProducts as Product[]));
-      });
-      setProducts(allProducts);
+      loadProducts();
       loadContacts();
     }
   }, [isAuthenticated]);
 
+  // Load products from database and merge with JSON
+  const loadProducts = async () => {
+    try {
+      // Load from JSON file first
+      const jsonProducts: Product[] = [];
+      Object.values(productsData).forEach((categoryProducts) => {
+        jsonProducts.push(...(categoryProducts as Product[]));
+      });
+
+      // Try to load from database
+      const response = await fetch('/api/admin/products', {
+        headers: {
+          'Authorization': `Bearer ${ADMIN_PASSWORD}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.products) {
+          // Map database products to Product type
+          const dbProducts: Product[] = data.products.map((p: any) => {
+            // Parse media array
+            let mediaArray = [];
+            try {
+              mediaArray = typeof p.media === 'string' ? JSON.parse(p.media) : (Array.isArray(p.media) ? p.media : []);
+            } catch (e) {
+              mediaArray = [];
+            }
+
+            // Parse specs object
+            let specsObj = {};
+            try {
+              specsObj = typeof p.specs === 'string' ? JSON.parse(p.specs) : (p.specs || {});
+            } catch (e) {
+              specsObj = {};
+            }
+
+            return {
+              id: p.id?.toString() || `db-${p.name}`,
+              name: p.name,
+              brand: p.brand || 'Unknown',
+              category: p.category || 'solar-panels',
+              price: parseFloat(p.price) || 0,
+              image: p.image || (mediaArray[0]?.url) || '/images/placeholder.jpg',
+              media: mediaArray,
+              description: p.description || '',
+              specs: specsObj,
+              featured: p.featured || false,
+              createdAt: p.created_at
+            };
+          });
+
+          // Merge products (database products take precedence)
+          setProducts([...jsonProducts, ...dbProducts]);
+          console.log(`Loaded ${jsonProducts.length} JSON products + ${dbProducts.length} database products`);
+        } else {
+          setProducts(jsonProducts);
+        }
+      } else {
+        setProducts(jsonProducts);
+      }
+    } catch (error) {
+      console.error('Failed to load products:', error);
+      // Fall back to JSON products
+      const jsonProducts: Product[] = [];
+      Object.values(productsData).forEach((categoryProducts) => {
+        jsonProducts.push(...(categoryProducts as Product[]));
+      });
+      setProducts(jsonProducts);
+    }
+  };
+
   // Load contacts from API
   const loadContacts = async () => {
+    console.log('📋 [ADMIN] ========================================');
+    console.log('📋 [ADMIN] Loading contacts...');
+    console.log('📋 [ADMIN] Timestamp:', new Date().toISOString());
+    console.log('📋 [ADMIN] Using password:', ADMIN_PASSWORD.substring(0, 5) + '...');
+
     try {
+      console.log('📋 [ADMIN] Making fetch request to /api/admin/contacts');
+
       const response = await fetch('/api/admin/contacts', {
         headers: {
           'Authorization': `Bearer ${ADMIN_PASSWORD}`
         }
       });
+
+      console.log('📋 [ADMIN] Response received');
+      console.log('📋 [ADMIN] Response status:', response.status);
+      console.log('📋 [ADMIN] Response ok:', response.ok);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('📋 [ADMIN] ❌ HTTP error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log('📋 [ADMIN] Response data structure:', {
+        success: data.success,
+        contactsCount: data.contacts?.length,
+        timestamp: data.timestamp
+      });
+      console.log('📋 [ADMIN] Full response data:', JSON.stringify(data, null, 2));
+
       if (data.success) {
+        console.log(`📋 [ADMIN] Setting contacts state with ${data.contacts.length} contacts`);
         setContacts(data.contacts);
+        console.log('📋 [ADMIN] ✅ Successfully loaded contacts from database');
+        console.log('📋 [ADMIN] First 2 contacts:', JSON.stringify(data.contacts.slice(0, 2), null, 2));
+
+        showToast({
+          type: 'success',
+          message: `Loaded ${data.contacts.length} contacts successfully`
+        });
+      } else {
+        console.error('📋 [ADMIN] ❌ API returned success:false -', data.error);
+        showToast({
+          type: 'error',
+          message: 'Failed to load contacts: ' + (data.error || 'Unknown error')
+        });
       }
     } catch (error) {
-      console.error('Failed to load contacts:', error);
+      console.error('📋 [ADMIN] ❌ Exception during fetch:', error);
+      console.error('📋 [ADMIN] Error details:', error instanceof Error ? error.stack : error);
+      showToast({
+        type: 'error',
+        message: 'Failed to load contacts: ' + (error instanceof Error ? error.message : 'Network error')
+      });
     }
+
+    console.log('📋 [ADMIN] ========================================');
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -154,54 +268,164 @@ export default function AdminPage() {
     setShowForm(true);
   };
 
-  const handleDelete = (productId: string) => {
-    setProducts((prev) => prev.filter((p) => p.id !== productId));
-    // In a real app, this would make an API call to delete from database
-    showToast({
-      type: 'success',
-      message: 'Product deleted successfully! (Note: This is a demo - changes are not persisted)'
-    });
+  const handleDelete = async (productId: string) => {
+    try {
+      const response = await fetch(`/api/admin/products/${productId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${ADMIN_PASSWORD}`
+        }
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setProducts((prev) => prev.filter((p) => p.id !== productId));
+        showToast({
+          type: 'success',
+          message: 'Product deleted successfully from database!'
+        });
+      } else {
+        throw new Error(data.error || 'Failed to delete product');
+      }
+    } catch (error) {
+      showToast({
+        type: 'error',
+        message: `Error deleting product: ${error instanceof Error ? error.message : 'Unknown error'}`
+      });
+    }
   };
 
-  const handleToggleFeatured = (productId: string, currentStatus: boolean) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === productId ? { ...p, featured: !currentStatus } : p))
-    );
-    // In a real app, this would make an API call to update in database
+  const handleToggleFeatured = async (productId: string, currentStatus: boolean) => {
+    try {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+
+      const response = await fetch(`/api/admin/products/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ADMIN_PASSWORD}`
+        },
+        body: JSON.stringify({
+          name: product.name,
+          brand: product.brand,
+          category: product.category,
+          price: product.price,
+          image: product.image,
+          description: product.description,
+          specs: product.specs,
+          media: product.media || [],
+          featured: !currentStatus
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setProducts((prev) =>
+          prev.map((p) => (p.id === productId ? { ...p, featured: !currentStatus } : p))
+        );
+      } else {
+        throw new Error(data.error || 'Failed to update product');
+      }
+    } catch (error) {
+      showToast({
+        type: 'error',
+        message: `Error updating featured status: ${error instanceof Error ? error.message : 'Unknown error'}`
+      });
+    }
   };
 
-  const handleFormSubmit = (productData: Partial<Product>) => {
+  const handleFormSubmit = async (productData: Partial<Product>) => {
     if (editingProduct) {
       // Update existing product
-      setProducts((prev) =>
-        prev.map((p) => (p.id === editingProduct.id ? { ...p, ...productData } : p))
-      );
-      showToast({
-        type: 'success',
-        message: 'Product updated successfully! (Note: This is a demo - changes are not persisted)'
-      });
+      try {
+        const response = await fetch(`/api/admin/products/${editingProduct.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${ADMIN_PASSWORD}`
+          },
+          body: JSON.stringify({
+            name: productData.name,
+            brand: productData.brand,
+            category: productData.category,
+            price: productData.price,
+            image: productData.image,
+            description: productData.description,
+            specs: productData.specs,
+            media: productData.media || [],
+            featured: productData.featured
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          setProducts((prev) =>
+            prev.map((p) => (p.id === editingProduct.id ? { ...p, ...productData } : p))
+          );
+          showToast({
+            type: 'success',
+            message: 'Product updated successfully!'
+          });
+        } else {
+          throw new Error(data.error || 'Failed to update product');
+        }
+      } catch (error) {
+        showToast({
+          type: 'error',
+          message: `Error updating product: ${error instanceof Error ? error.message : 'Unknown error'}`
+        });
+        return;
+      }
     } else {
       // Create new product with auto-generated SKU
       try {
         const sku = generateSKU(productData, products);
-        const newProduct: Product = {
-          id: sku,
-          name: productData.name || '',
-          brand: productData.brand || '',
-          category: productData.category || 'solar-panels',
-          price: productData.price || 0,
-          image: productData.image || '',
-          description: productData.description || '',
-          specs: productData.specs || {},
-          featured: productData.featured || false,
-          createdAt: new Date().toISOString(),
-        };
-        setProducts((prev) => [...prev, newProduct]);
-        showToast({
-          type: 'success',
-          message: `Product created with SKU: ${sku}`,
-          duration: 7000
+
+        const response = await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${ADMIN_PASSWORD}`
+          },
+          body: JSON.stringify({
+            id: sku,
+            name: productData.name,
+            brand: productData.brand,
+            category: productData.category,
+            price: productData.price,
+            image: productData.image,
+            description: productData.description,
+            specs: productData.specs,
+            media: productData.media || [],
+            featured: productData.featured
+          })
         });
+
+        const data = await response.json();
+        if (data.success) {
+          const newProduct: Product = {
+            id: sku,
+            name: productData.name || '',
+            brand: productData.brand || '',
+            category: productData.category || 'solar-panels',
+            price: productData.price || 0,
+            image: productData.image || '',
+            media: productData.media || [],
+            description: productData.description || '',
+            specs: productData.specs || {},
+            featured: productData.featured || false,
+            createdAt: new Date().toISOString(),
+          };
+          setProducts((prev) => [...prev, newProduct]);
+          showToast({
+            type: 'success',
+            message: `Product created with SKU: ${sku} and saved to database!`,
+            duration: 7000
+          });
+        } else {
+          throw new Error(data.error || 'Failed to create product');
+        }
       } catch (error) {
         showToast({
           type: 'error',
@@ -592,6 +816,19 @@ export default function AdminPage() {
                     <option value="closed">Closed</option>
                   </select>
                 </div>
+
+                {/* Refresh Button */}
+                <button
+                  type="button"
+                  onClick={loadContacts}
+                  className="w-full md:w-auto px-md py-sm min-h-touch bg-primary text-white font-sans font-semibold hover:bg-primary-dark transition-colors rounded shadow-md flex items-center justify-center gap-xs"
+                  title="Refresh contacts"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Refresh
+                </button>
               </div>
             </div>
 
@@ -601,6 +838,21 @@ export default function AdminPage() {
                 Showing <span className="font-semibold text-text-primary">{filteredContacts.length}</span> of{' '}
                 <span className="font-semibold text-text-primary">{contacts.length}</span> contacts
               </p>
+            </div>
+
+            {/* Debug Info - Remove after testing */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-md mb-md">
+              <h4 className="font-semibold text-sm mb-2">Debug Info:</h4>
+              <p className="text-sm">Total contacts: {contacts.length}</p>
+              <p className="text-sm">Filtered contacts: {filteredContacts.length}</p>
+              <p className="text-sm">Search query: "{contactSearch}"</p>
+              <p className="text-sm">Status filter: {contactStatusFilter}</p>
+              {contacts.length > 0 && (
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-sm font-medium">View first contact</summary>
+                  <pre className="text-xs mt-2 overflow-auto">{JSON.stringify(contacts[0], null, 2)}</pre>
+                </details>
+              )}
             </div>
 
             {/* Contacts Table */}
@@ -639,7 +891,12 @@ export default function AdminPage() {
 
       {/* Product Form Modal */}
       {showForm && (
-        <AdminProductForm product={editingProduct} onSubmit={handleFormSubmit} onCancel={handleFormCancel} />
+        <AdminProductForm
+          product={editingProduct}
+          onSubmit={handleFormSubmit}
+          onCancel={handleFormCancel}
+          adminPassword={ADMIN_PASSWORD}
+        />
       )}
     </div>
   );

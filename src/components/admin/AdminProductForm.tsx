@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Product, ProductCategory } from '@/lib/types';
+import { Product, ProductCategory, MediaFile } from '@/lib/types';
+import FileUploader from '@/components/FileUploader';
 
 interface AdminProductFormProps {
   product?: Product | null;
   onSubmit: (productData: Partial<Product>) => void;
   onCancel: () => void;
+  adminPassword: string;
 }
 
 const CATEGORIES: { value: ProductCategory; label: string }[] = [
@@ -16,7 +18,7 @@ const CATEGORIES: { value: ProductCategory; label: string }[] = [
   { value: 'accessories', label: 'Accessories' },
 ];
 
-export default function AdminProductForm({ product, onSubmit, onCancel }: AdminProductFormProps) {
+export default function AdminProductForm({ product, onSubmit, onCancel, adminPassword }: AdminProductFormProps) {
   const [formData, setFormData] = useState({
     name: '',
     brand: '',
@@ -34,6 +36,7 @@ export default function AdminProductForm({ product, onSubmit, onCancel }: AdminP
     featured: false,
   });
 
+  const [media, setMedia] = useState<MediaFile[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -54,6 +57,20 @@ export default function AdminProductForm({ product, onSubmit, onCancel }: AdminP
         certifications: product.specs?.certifications?.toString() || '',
         featured: product.featured || false,
       });
+
+      // Load existing media
+      if (product.media && product.media.length > 0) {
+        setMedia(product.media);
+      } else if (product.image) {
+        // Fallback: convert single image to media array
+        setMedia([{
+          url: product.image,
+          type: 'image',
+          public_id: '',
+          thumbnail_url: product.image,
+          order: 0,
+        }]);
+      }
     }
   }, [product]);
 
@@ -82,7 +99,7 @@ export default function AdminProductForm({ product, onSubmit, onCancel }: AdminP
     if (!formData.name.trim()) newErrors.name = 'Product name is required';
     if (!formData.brand.trim()) newErrors.brand = 'Brand is required';
     if (!formData.price || parseFloat(formData.price) <= 0) newErrors.price = 'Valid price is required';
-    if (!formData.image.trim()) newErrors.image = 'Image URL is required';
+    if (media.length === 0) newErrors.media = 'At least one image or video is required';
     if (!formData.description.trim()) newErrors.description = 'Description is required';
 
     setErrors(newErrors);
@@ -110,7 +127,8 @@ export default function AdminProductForm({ product, onSubmit, onCancel }: AdminP
       brand: formData.brand,
       category: formData.category,
       price: parseFloat(formData.price),
-      image: formData.image,
+      image: media[0]?.url || '', // First media item as primary image (backward compatibility)
+      media: media,
       description: formData.description,
       specs,
       featured: formData.featured,
@@ -376,32 +394,22 @@ export default function AdminProductForm({ product, onSubmit, onCancel }: AdminP
             </div>
           </div>
 
-          {/* Image Section */}
+          {/* Media Section */}
           <div className="space-y-md">
             <h3 className="text-h3 font-display font-medium text-text-primary border-b border-border pb-xs">
-              Product Image
+              Product Media <span className="text-error">*</span>
             </h3>
 
-            <div>
-              <label htmlFor="image" className="block text-body font-medium text-text-primary mb-xs">
-                Image URL <span className="text-error">*</span>
-              </label>
-              <input
-                type="url"
-                id="image"
-                name="image"
-                value={formData.image}
-                onChange={handleChange}
-                className={`w-full px-md py-sm border ${
-                  errors.image ? 'border-error' : 'border-border'
-                } bg-surface focus:border-primary focus:outline-none rounded`}
-                placeholder="https://example.com/image.jpg"
-              />
-              {errors.image && <p className="text-caption text-error mt-xs">{errors.image}</p>}
-              <p className="text-caption text-text-secondary mt-xs">
-                Enter the full URL of the product image (hosted on a CDN or image service)
-              </p>
-            </div>
+            <FileUploader
+              value={media}
+              onChange={setMedia}
+              maxFiles={10}
+              adminPassword={adminPassword}
+            />
+            {errors.media && <p className="text-caption text-error mt-xs">{errors.media}</p>}
+            <p className="text-caption text-text-secondary">
+              Upload images and videos for this product. The first item will be used as the primary image.
+            </p>
           </div>
 
           {/* Status Section */}

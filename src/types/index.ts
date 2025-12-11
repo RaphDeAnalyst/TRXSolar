@@ -1,15 +1,28 @@
 // Database Models
 
 export interface Product {
-  id: number;
+  id: string;
   name: string;
+  brand?: string;
   description?: string;
   price?: number;
-  image_url?: string;
+  image?: string;
   category?: string;
-  specifications?: Record<string, any>;
+  specs?: Record<string, any>;
+  media?: MediaFile[];
+  featured?: boolean;
   created_at: Date;
-  updated_at: Date;
+}
+
+export interface MediaFile {
+  url: string;
+  type: 'image' | 'video';
+  public_id: string;
+  thumbnail_url?: string;
+  order: number;
+  width?: number;
+  height?: number;
+  format?: string;
 }
 
 export interface Contact {
@@ -19,7 +32,7 @@ export interface Contact {
   phone?: string;
   message: string;
   status: 'new' | 'in_progress' | 'resolved' | 'closed';
-  created_at: Date;
+  created_at: Date | string;
 }
 
 export interface AdminUser {
@@ -66,9 +79,12 @@ export interface ContactFormData {
 
 export interface ProductFormData {
   name: string;
+  brand?: string;
   description?: string;
   price?: number;
-  image_url?: string;
+  image?: string;
   category?: string;
-  specifications?: Record<string, any>;
+  specs?: Record<string, any>;
+  media?: MediaFile[];
+  featured?: boolean;
 }

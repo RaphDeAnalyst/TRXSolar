@@ -23,7 +23,7 @@ export default function TrustElements({ email, phone, officeHours, officeAddress
           Get in Touch
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
+        <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-lg md:gap-2xl">
           {/* Column 1: Contact Information */}
           <div className="space-y-lg">
             {/* Email */}
