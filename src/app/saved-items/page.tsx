@@ -12,6 +12,7 @@ export default function SavedItemsPage() {
   const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [dbProducts, setDbProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     loadWishlistProducts();
@@ -28,14 +29,49 @@ export default function SavedItemsPage() {
     };
   }, []);
 
+  // Fetch products from database on mount
+  useEffect(() => {
+    const fetchDatabaseProducts = async () => {
+      try {
+        console.log('[Saved Items] Fetching products from /api/products...');
+        const response = await fetch('/api/products');
+        console.log('[Saved Items] Response status:', response.status, response.statusText);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('[Saved Items] API Response:', data);
+
+          if (data.success && data.products) {
+            console.log(`[Saved Items] ✅ Loaded ${data.products.length} products from database`);
+            setDbProducts(data.products);
+          } else {
+            console.warn('[Saved Items] ⚠️ API returned success:false or no products array');
+          }
+        } else {
+          const errorText = await response.text();
+          console.error('[Saved Items] ❌ API request failed:', response.status, errorText);
+        }
+      } catch (error) {
+        console.error('[Saved Items] ❌ Failed to load database products:', error);
+      }
+    };
+
+    fetchDatabaseProducts();
+  }, []);
+
   const loadWishlistProducts = () => {
     const wishlistIds = getWishlistItems();
 
-    // Get all products
+    // Get all products - merge JSON and database products
     const allProducts: Product[] = [];
+
+    // Add products from JSON file (backward compatibility)
     Object.values(productsData).forEach((categoryProducts) => {
       allProducts.push(...(categoryProducts as Product[]));
     });
+
+    // Add products from database
+    allProducts.push(...dbProducts);
 
     // Filter products that are in wishlist
     const savedProducts = allProducts.filter((product) =>
