@@ -63,7 +63,7 @@ export default async function Home() {
   return (
     <>
       {/* Hero Section - Split with Carousels */}
-      <section className="w-screen h-screen pt-[72px] flex flex-col md:flex-row">
+      <section className="w-screen h-screen flex flex-col md:flex-row">
         {/* Left - Solar Panels */}
         <div className="relative w-full md:w-1/2 h-1/2 md:h-full">
           <ImageCarousel images={solarPanelImages} alt="Solar Panel" />
