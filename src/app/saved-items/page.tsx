@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
 import { getWishlistItems, clearWishlist } from '@/lib/wishlist';
@@ -59,7 +59,7 @@ export default function SavedItemsPage() {
     fetchDatabaseProducts();
   }, []);
 
-  const loadWishlistProducts = () => {
+  const loadWishlistProducts = useCallback(() => {
     const wishlistIds = getWishlistItems();
 
     // Get all products - merge JSON and database products
@@ -73,14 +73,24 @@ export default function SavedItemsPage() {
     // Add products from database
     allProducts.push(...dbProducts);
 
+    console.log('[Saved Items] Loading wishlist with', allProducts.length, 'total products');
+    console.log('[Saved Items] Wishlist IDs:', wishlistIds);
+
     // Filter products that are in wishlist
     const savedProducts = allProducts.filter((product) =>
       wishlistIds.includes(product.id)
     );
 
+    console.log('[Saved Items] Found', savedProducts.length, 'saved products');
+
     setWishlistItems(savedProducts);
     setLoading(false);
-  };
+  }, [dbProducts]);
+
+  // Reload wishlist when database products are loaded
+  useEffect(() => {
+    loadWishlistProducts();
+  }, [loadWishlistProducts]);
 
   const handleClearAll = () => {
     setShowClearConfirm(true);
