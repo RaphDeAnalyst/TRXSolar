@@ -44,16 +44,26 @@ function ProductsPageContent() {
   useEffect(() => {
     const fetchDatabaseProducts = async () => {
       try {
+        console.log('[Products Page] Fetching products from /api/products...');
         const response = await fetch('/api/products');
+        console.log('[Products Page] Response status:', response.status, response.statusText);
+
         if (response.ok) {
           const data = await response.json();
+          console.log('[Products Page] API Response:', data);
+
           if (data.success && data.products) {
-            // The API already transforms the products properly, so we can use them directly
+            console.log(`[Products Page] ✅ Loaded ${data.products.length} products from database`);
             setDbProducts(data.products);
+          } else {
+            console.warn('[Products Page] ⚠️ API returned success:false or no products array');
           }
+        } else {
+          const errorText = await response.text();
+          console.error('[Products Page] ❌ API request failed:', response.status, errorText);
         }
       } catch (error) {
-        console.error('Failed to load database products:', error);
+        console.error('[Products Page] ❌ Failed to load database products:', error);
       } finally {
         setIsLoadingProducts(false);
       }

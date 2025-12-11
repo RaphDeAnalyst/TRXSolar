@@ -5,10 +5,14 @@ import { Product } from '@/lib/types';
 // Public GET endpoint - no auth required
 export async function GET() {
   try {
+    console.log('[API /products] Fetching products from database...');
+
     const result = await sql`
       SELECT * FROM products
       ORDER BY created_at DESC
     `;
+
+    console.log(`[API /products] Found ${result.rows.length} products in database`);
 
     // Transform database products to Product type
     const products: Product[] = result.rows.map((p: any) => {
@@ -45,12 +49,14 @@ export async function GET() {
       };
     });
 
+    console.log(`[API /products] ✅ Successfully transformed ${products.length} products`);
+
     return NextResponse.json({
       success: true,
       products: products
     });
   } catch (error) {
-    console.error('Error fetching products:', error);
+    console.error('[API /products] ❌ Error fetching products:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch products' },
       { status: 500 }
