@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { Product, ProductCategory } from '@/lib/types';
+import PriceRangeSlider from '@/components/PriceRangeSlider';
 
 interface ProductFilterPanelProps {
   // Filter state
@@ -119,7 +120,7 @@ export default function ProductFilterPanel({
                 ? 'bg-primary text-white shadow-sm'
                 : 'bg-background hover:bg-border text-text-primary'
             }`}
-            aria-pressed={category === null ? 'true' : 'false'}
+            aria-pressed={category === null}
           >
             All Products
           </button>
@@ -135,7 +136,7 @@ export default function ProductFilterPanel({
                   ? 'bg-primary text-white shadow-sm'
                   : 'bg-background hover:bg-border text-text-primary'
               }`}
-              aria-pressed={category === cat.value ? 'true' : 'false'}
+              aria-pressed={category === cat.value}
             >
               {cat.label}
             </button>
@@ -148,44 +149,13 @@ export default function ProductFilterPanel({
         <h3 className="text-base font-display font-semibold text-text-primary mb-3">
           Price Range
         </h3>
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="price-min" className="text-xs font-sans text-text-secondary mb-1 block">
-              Min Price
-            </label>
-            <input
-              id="price-min"
-              type="range"
-              min="0"
-              max={maxPrice}
-              step="1000"
-              value={priceRange[0]}
-              onChange={(e) => onPriceRangeChange([Number(e.target.value), priceRange[1]])}
-              className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer accent-primary"
-            />
-            <div className="text-sm font-mono font-semibold text-primary mt-1">
-              ₦{priceRange[0].toLocaleString()}
-            </div>
-          </div>
-          <div>
-            <label htmlFor="price-max" className="text-xs font-sans text-text-secondary mb-1 block">
-              Max Price
-            </label>
-            <input
-              id="price-max"
-              type="range"
-              min="0"
-              max={maxPrice}
-              step="1000"
-              value={priceRange[1]}
-              onChange={(e) => onPriceRangeChange([priceRange[0], Number(e.target.value)])}
-              className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer accent-primary"
-            />
-            <div className="text-sm font-mono font-semibold text-primary mt-1">
-              ₦{priceRange[1].toLocaleString()}
-            </div>
-          </div>
-        </div>
+        <PriceRangeSlider
+          min={0}
+          max={maxPrice}
+          step={5000}
+          value={priceRange}
+          onChange={onPriceRangeChange}
+        />
       </div>
 
       {/* Brand Filter */}
@@ -236,7 +206,7 @@ export default function ProductFilterPanel({
             isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
           onClick={onClose}
-          aria-hidden={!isOpen ? 'true' : 'false'}
+          aria-hidden={!isOpen}
         />
 
         {/* Bottom Sheet */}
