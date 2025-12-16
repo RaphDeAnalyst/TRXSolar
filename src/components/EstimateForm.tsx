@@ -165,7 +165,7 @@ export default function EstimateForm() {
               type="text"
               value={formData.address}
               onChange={(e) => updateFormData('address', e.target.value)}
-              className={`w-full px-md py-sm border rounded focus:outline-none focus:border-primary ${
+              className={`w-full px-md py-3 border rounded focus:outline-none focus:border-primary min-h-[48px] ${
                 errors.address ? 'border-error' : 'border-border'
               }`}
               placeholder="Enter your full address"
@@ -182,7 +182,7 @@ export default function EstimateForm() {
               type="text"
               value={formData.fullName}
               onChange={(e) => updateFormData('fullName', e.target.value)}
-              className={`w-full px-md py-sm border rounded focus:outline-none focus:border-primary ${
+              className={`w-full px-md py-3 border rounded focus:outline-none focus:border-primary min-h-[48px] ${
                 errors.fullName ? 'border-error' : 'border-border'
               }`}
               placeholder="Enter your full name"
@@ -199,7 +199,7 @@ export default function EstimateForm() {
               type="email"
               value={formData.email}
               onChange={(e) => updateFormData('email', e.target.value)}
-              className={`w-full px-md py-sm border rounded focus:outline-none focus:border-primary ${
+              className={`w-full px-md py-3 border rounded focus:outline-none focus:border-primary min-h-[48px] ${
                 errors.email ? 'border-error' : 'border-border'
               }`}
               placeholder="your.email@example.com"
@@ -217,7 +217,7 @@ export default function EstimateForm() {
                 value={formData.countryCode}
                 onChange={(e) => updateFormData('countryCode', e.target.value)}
                 aria-label="Country code"
-                className="w-full md:w-40 px-sm py-sm border border-border rounded focus:border-primary focus:outline-none"
+                className="w-full md:w-40 px-sm py-3 border border-border rounded focus:border-primary focus:outline-none min-h-[48px]"
               >
                 {COUNTRY_CODES.map((country) => (
                   <option key={`${country.iso}-${country.code}`} value={country.code}>
@@ -229,7 +229,7 @@ export default function EstimateForm() {
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => updateFormData('phone', e.target.value)}
-                className={`w-full md:flex-1 px-md py-sm border rounded focus:outline-none focus:border-primary ${
+                className={`w-full md:flex-1 px-md py-3 border rounded focus:outline-none focus:border-primary min-h-[48px] ${
                   errors.phone ? 'border-error' : 'border-border'
                 }`}
                 placeholder="Phone number"
@@ -246,7 +246,7 @@ export default function EstimateForm() {
             <select
               value={formData.timeframe}
               onChange={(e) => updateFormData('timeframe', e.target.value)}
-              className="w-full px-md py-sm border border-border rounded focus:outline-none focus:border-primary"
+              className="w-full px-md py-3 border border-border rounded focus:outline-none focus:border-primary min-h-[48px]"
               aria-label="Installation timeframe"
             >
               <option value="">Select timeframe</option>

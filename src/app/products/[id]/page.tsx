@@ -189,25 +189,26 @@ export default async function ProductPage({ params }: ProductPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
       />
-      {/* Breadcrumb */}
-      <div className="bg-background border-b border-border px-sm py-sm">
+      {/* Breadcrumb: Mobile-Optimized */}
+      <div className="bg-background border-b border-border px-4 md:px-6 py-3">
         <div className="max-w-7xl mx-auto">
-          <nav className="flex items-center gap-sm text-caption text-text-secondary">
-            <Link href="/products" className="hover:text-primary">
+          <nav className="flex items-center gap-2 text-xs md:text-sm text-text-secondary">
+            <Link href="/products" className="hover:text-primary transition-colors">
               Products
             </Link>
             <span>/</span>
-            <Link href={`/products?category=${product.category}`} className="hover:text-primary">
+            <Link href={`/products?category=${product.category}`} className="hover:text-primary transition-colors">
               {product.category.replace('-', ' ')}
             </Link>
             <span>/</span>
-            <span className="text-text-primary font-medium">{product.name}</span>
+            <span className="text-text-primary font-medium truncate">{product.name}</span>
           </nav>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-sm py-lg">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2xl mb-2xl">
+      {/* Mobile-First Container with Proper Edge Spacing */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-lg">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-2xl mb-2xl">
           {/* Product Image Gallery */}
           <div>
             <ProductImageGallery
@@ -218,7 +219,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
 
           {/* Product Info */}
-          <div className="space-y-lg">
+          <div className="space-y-6">
             {/* Category Badge */}
             <div>
               <span className="text-xs font-medium text-text-secondary uppercase tracking-wide">
@@ -226,16 +227,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </span>
             </div>
 
-            {/* Title */}
+            {/* Title: Fluid Typography - Mobile-First Responsive */}
             <div>
-              <h1 className="text-3xl md:text-5xl lg:text-6xl text-text-primary font-bold mb-sm">{product.name}</h1>
-              <p className="text-body text-text-secondary">{product.brand}</p>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl text-text-primary font-display font-bold mb-3 tracking-tight">
+                {product.name}
+              </h1>
+              <p className="text-base text-text-secondary">{product.brand}</p>
             </div>
 
-            {/* Price & Warranty */}
-            <div className="py-md border-t border-b border-border">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-md">
-                <div className="text-3xl font-bold text-primary">₦{product.price.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            {/* Price & Warranty: Responsive Sizing */}
+            <div className="py-4 border-t border-b border-border">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="text-xl md:text-2xl font-semibold text-primary">
+                  ₦{product.price.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
                 {product.specs.warranty && (
                   <WarrantyBadge warranty={String(product.specs.warranty)} />
                 )}
@@ -244,21 +249,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             {/* Description */}
             <div>
-              <p className="text-body text-text-primary leading-relaxed">{product.description}</p>
+              <p className="text-base text-text-primary leading-relaxed">{product.description}</p>
             </div>
 
-            {/* Specifications */}
-            <div className="border border-border">
-              <h3 className="text-body font-medium text-text-primary p-md border-b border-border bg-background">
+            {/* Specifications: Section Header with Proper Sizing */}
+            <div className="border border-border rounded-lg">
+              <h3 className="text-lg font-display font-semibold text-text-primary p-4 border-b border-border bg-background">
                 Specifications
               </h3>
               <div className="divide-y divide-border">
                 {Object.entries(product.specs).map(([key, value]) => (
-                  <div key={key} className="flex justify-between px-md py-sm">
-                    <span className="text-body text-text-primary font-medium capitalize">
+                  <div key={key} className="flex justify-between px-4 py-3">
+                    <span className="text-sm md:text-base text-text-primary font-medium capitalize">
                       {key.replace(/_/g, ' ')}
                     </span>
-                    <span className="text-body text-text-primary font-bold">{value}</span>
+                    <span className="text-sm md:text-base text-text-primary font-semibold">{value}</span>
                   </div>
                 ))}
               </div>

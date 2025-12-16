@@ -132,7 +132,7 @@ export default function GeneralInquiryForm() {
               type="text"
               value={formData.fullName}
               onChange={(e) => updateFormData('fullName', e.target.value)}
-              className={`w-full px-md py-sm border rounded focus:outline-none focus:border-primary ${
+              className={`w-full px-md py-3 border rounded focus:outline-none focus:border-primary min-h-[48px] ${
                 errors.fullName ? 'border-error' : 'border-border'
               }`}
               placeholder="Enter your full name"
@@ -149,7 +149,7 @@ export default function GeneralInquiryForm() {
               type="email"
               value={formData.email}
               onChange={(e) => updateFormData('email', e.target.value)}
-              className={`w-full px-md py-sm border rounded focus:outline-none focus:border-primary ${
+              className={`w-full px-md py-3 border rounded focus:outline-none focus:border-primary min-h-[48px] ${
                 errors.email ? 'border-error' : 'border-border'
               }`}
               placeholder="your.email@example.com"
@@ -167,7 +167,7 @@ export default function GeneralInquiryForm() {
                 value={formData.countryCode}
                 onChange={(e) => updateFormData('countryCode', e.target.value)}
                 aria-label="Country code"
-                className="w-full md:w-40 px-sm py-sm border border-border rounded focus:border-primary focus:outline-none"
+                className="w-full md:w-40 px-sm py-3 border border-border rounded focus:border-primary focus:outline-none min-h-[48px]"
               >
                 {COUNTRY_CODES.map((country) => (
                   <option key={`${country.iso}-${country.code}`} value={country.code}>
@@ -179,7 +179,7 @@ export default function GeneralInquiryForm() {
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => updateFormData('phone', e.target.value)}
-                className={`w-full md:flex-1 px-md py-sm border rounded focus:outline-none focus:border-primary ${
+                className={`w-full md:flex-1 px-md py-3 border rounded focus:outline-none focus:border-primary min-h-[48px] ${
                   errors.phone ? 'border-error' : 'border-border'
                 }`}
                 placeholder="Phone number"

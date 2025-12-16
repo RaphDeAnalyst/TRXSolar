@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
-import ImageCarousel from '@/components/ImageCarousel';
-import productsData from '@/data/products.json';
+import HomeHero from '@/components/HomeHero';
 import { Product } from '@/lib/types';
 
 async function getProducts() {
@@ -51,115 +50,120 @@ export default async function Home() {
   // Get featured products from database (already filtered and limited to 6)
   const featuredProducts = await getProducts();
 
-  // Get all products for carousel images (JSON + featured products)
-  const allProducts: Product[] = [
-    ...(productsData['solar-panels'] as Product[]),
-    ...(productsData.inverters as Product[]),
-    ...(productsData.batteries as Product[]),
-    ...featuredProducts
-  ];
-
-  // Extract images for carousels from database products
-  const solarPanelImages = allProducts
-    .filter(p => p.category === 'solar-panels' && p.image)
-    .map((p) => p.image)
-    .slice(0, 5); // Limit to 5 images for carousel
-
-  const inverterImages = allProducts
-    .filter(p => p.category === 'inverters' && p.image)
-    .map((p) => p.image)
-    .slice(0, 5); // Limit to 5 images for carousel
-
   return (
     <>
-      {/* Hero Section - Split with Carousels */}
-      <section className="w-screen h-screen flex flex-col md:flex-row">
-        {/* Left - Solar Panels */}
-        <div className="relative w-full md:w-1/2 h-1/2 md:h-full">
-          <ImageCarousel images={solarPanelImages} alt="Solar Panel" />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/80">
-            <div className="text-center text-white px-md md:px-lg max-w-2xl mx-auto">
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight mb-md text-white">
-                High-Efficiency Solar Panels
-              </h1>
-              <p className="text-lg font-sans leading-relaxed mb-lg max-w-md mx-auto text-white">
-                High-efficiency solar panels for maximum energy generation
-              </p>
-              <Link
-                href="/products?category=solar-panels"
-                className="inline-block bg-primary-light text-white px-lg py-sm min-h-touch font-display font-semibold hover:bg-primary transition-colors shadow-lg border-2 border-white/40"
-              >
-                Shop Solar Panels
-              </Link>
-            </div>
-          </div>
-        </div>
+      {/* Unified Hero Component */}
+      <HomeHero />
 
-        {/* Right - Inverters */}
-        <div className="relative w-full md:w-1/2 h-1/2 md:h-full">
-          <ImageCarousel images={inverterImages} alt="Inverter" />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/80">
-            <div className="text-center text-white px-md md:px-lg max-w-2xl mx-auto">
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight mb-md text-white">
-                Reliable Power Inverters
-              </h1>
-              <p className="text-lg font-sans leading-relaxed mb-lg max-w-md mx-auto text-white">
-                Premium inverters for reliable power conversion
-              </p>
-              <Link
-                href="/products?category=inverters"
-                className="inline-block bg-primary-light text-white px-lg py-sm min-h-touch font-display font-semibold hover:bg-primary transition-colors shadow-lg border-2 border-white/40"
-              >
-                Shop Inverters
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Shop by Category Section - Premium Bento Grid */}
+      <section id="shop-categories" className="py-12 md:py-16 bg-background">
+        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-text-primary mb-8 text-center">
+            Shop by Category
+          </h2>
 
-      <div className="w-full">
-        {/* Categories Section */}
-        <section className="py-lg px-sm">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl text-text-primary mb-lg font-medium text-center">Shop by Category</h2>
+          {/* Mobile: 2-column grid | Desktop: 12-column Bento Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-12 gap-4 md:gap-6">
 
-          {/* Mobile-First Grid: 2 columns on mobile, 4 columns on desktop */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Solar Panels - Hero Card (6 columns, spans 2 rows on desktop) */}
             <Link
               href="/products?category=solar-panels"
-              className="w-full bg-primary text-surface py-4 px-2 min-h-touch font-display font-semibold text-sm md:text-base hover:bg-primary-dark active:scale-95 transition-all duration-200 flex items-center justify-center text-center"
+              className="group relative overflow-hidden rounded-3xl
+                         col-span-2 md:col-span-6 md:row-span-2
+                         min-h-[200px] md:min-h-[400px]
+                         hover:scale-[1.02] transition-transform duration-300
+                         focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              style={{
+                backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200&q=80')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
             >
-              Solar Panels
+              {/* Glassmorphism Badge - Bottom Left */}
+              <div className="absolute bottom-6 left-6 bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl">
+                <span className="text-white font-bold text-lg md:text-xl font-display">
+                  Solar Panels
+                </span>
+              </div>
             </Link>
+
+            {/* Inverters - Top Right (6 columns, 1 row) */}
             <Link
               href="/products?category=inverters"
-              className="w-full bg-primary text-surface py-4 px-2 min-h-touch font-display font-semibold text-sm md:text-base hover:bg-primary-dark active:scale-95 transition-all duration-200 flex items-center justify-center text-center"
+              className="group relative overflow-hidden rounded-3xl
+                         col-span-1 md:col-span-6
+                         min-h-[200px] md:min-h-[190px]
+                         hover:scale-[1.02] transition-transform duration-300
+                         focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              style={{
+                backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=1200&q=80')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
             >
-              Inverters
+              {/* Glassmorphism Badge - Bottom Left */}
+              <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl">
+                <span className="text-white font-bold text-base md:text-lg font-display">
+                  Inverters
+                </span>
+              </div>
             </Link>
+
+            {/* Batteries - Middle Right (3 columns, 1 row) */}
             <Link
               href="/products?category=batteries"
-              className="w-full bg-primary text-surface py-4 px-2 min-h-touch font-display font-semibold text-sm md:text-base hover:bg-primary-dark active:scale-95 transition-all duration-200 flex items-center justify-center text-center"
+              className="group relative overflow-hidden rounded-3xl
+                         col-span-1 md:col-span-3
+                         min-h-[200px] md:min-h-[190px]
+                         hover:scale-[1.02] transition-transform duration-300
+                         focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              style={{
+                backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1624996752380-8ec242ebc179?w=800&q=80')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
             >
-              Batteries
+              {/* Glassmorphism Badge - Bottom Left */}
+              <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl">
+                <span className="text-white font-bold text-base md:text-lg font-display">
+                  Batteries
+                </span>
+              </div>
             </Link>
+
+            {/* Charge Controllers - Bottom Right (3 columns, 1 row) */}
             <Link
               href="/products?category=accessories"
-              className="w-full bg-primary text-surface py-4 px-2 min-h-touch font-display font-semibold text-sm md:text-base hover:bg-primary-dark active:scale-95 transition-all duration-200 flex items-center justify-center text-center"
+              className="group relative overflow-hidden rounded-3xl
+                         col-span-2 md:col-span-3
+                         min-h-[200px] md:min-h-[190px]
+                         hover:scale-[1.02] transition-transform duration-300
+                         focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              style={{
+                backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
             >
-              Charge Controllers
+              {/* Glassmorphism Badge - Bottom Left */}
+              <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl">
+                <span className="text-white font-bold text-base md:text-lg font-display">
+                  Charge Controllers
+                </span>
+              </div>
             </Link>
+
           </div>
         </div>
       </section>
 
       {/* Featured Products */}
       {featuredProducts.length > 0 && (
-        <section className="py-lg px-sm bg-background">
-          <div className="max-w-7xl mx-auto">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl text-text-primary mb-lg font-medium">Featured Products</h2>
+        <section className="py-12 md:py-16 px-4 sm:px-6 lg:px-8 bg-background">
+          <div className="max-w-screen-2xl mx-auto">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-text-primary mb-8 text-center">Featured Products</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
               {featuredProducts.map((product: Product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -169,9 +173,9 @@ export default async function Home() {
       )}
 
       {/* Why Choose Us */}
-      <section className="py-lg px-sm">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl text-text-primary mb-lg font-medium">Why Choose VCSolar</h2>
+      <section className="py-12 md:py-16 px-4 sm:px-6 lg:px-8 bg-background">
+        <div className="max-w-screen-2xl mx-auto">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-text-primary mb-8 text-center">Why Choose VCSolar</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
             <div className="bg-surface border border-border p-md">
@@ -202,21 +206,20 @@ export default async function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-lg px-sm bg-text-primary text-surface">
+      <section className="py-12 md:py-16 px-4 sm:px-6 lg:px-8 bg-text-primary text-surface">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl text-surface mb-md font-medium">Ready to Go Solar?</h2>
-          <p className="text-body mb-lg">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-surface mb-6">Ready to Go Solar?</h2>
+          <p className="text-base md:text-lg mb-8 leading-relaxed">
             Get in touch with our team to discuss your solar energy needs and find the perfect solution.
           </p>
           <Link
             href="/contact"
-            className="inline-block bg-primary text-surface px-lg py-sm min-h-touch font-medium hover:bg-primary-dark transition-colors"
+            className="inline-block bg-primary text-surface px-8 py-4 min-h-[56px] font-display font-semibold hover:bg-primary-dark transition-colors shadow-lg rounded-lg"
           >
             Contact Us Today
           </Link>
         </div>
       </section>
-      </div>
     </>
   );
 }

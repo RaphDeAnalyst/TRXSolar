@@ -53,9 +53,9 @@ export default function ProductCard({ product }: ProductCardProps) {
   });
 
   return (
-    <article className="bg-surface hover:shadow-lg cursor-pointer transition-shadow h-full flex flex-col">
+    <article className="group relative border border-gray-100 rounded-2xl bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out cursor-pointer h-full flex flex-col overflow-hidden">
       {/* Image Container - 4:5 aspect ratio */}
-      <div className="relative w-full aspect-[4/5] bg-background overflow-hidden">
+      <div className="relative w-full aspect-[4/5] bg-gray-50 overflow-hidden">
         <Link href={`/products/${product.id}`}>
           <Image
             src={optimizedImageUrl}
@@ -68,10 +68,10 @@ export default function ProductCard({ product }: ProductCardProps) {
           />
         </Link>
 
-        {/* Wishlist Heart Icon */}
+        {/* Wishlist Heart Icon - Top Right Corner */}
         <button
           type="button"
-          className={`absolute bottom-3 right-3 w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-all z-10 ${
+          className={`absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-all z-10 ${
             isInWishlist
               ? 'bg-primary text-white hover:bg-primary-dark'
               : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -102,33 +102,33 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.brand}
         </p>
 
-        {/* Product Name - Larger, bolder */}
+        {/* Product Name - With fixed height for consistency */}
         <Link href={`/products/${product.id}`}>
-          <h3 className="text-base font-sans font-semibold text-text-primary line-clamp-2 leading-snug hover:text-primary transition-colors">
+          <h3 className="text-sm md:text-base font-bold text-gray-800 line-clamp-2 min-h-[3rem] leading-snug hover:text-primary transition-colors">
             {product.name}
           </h3>
         </Link>
 
-        {/* Specifications - Compact display */}
-        <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+        {/* Specifications - Sleek pills with light blue/gray background */}
+        <div className="flex flex-wrap gap-2 text-xs text-gray-700">
           {displaySpecs.map((spec, index) => (
-            <span key={index} className="bg-gray-100 px-2 py-1 rounded">
+            <span key={index} className="bg-blue-50 text-blue-900 px-2.5 py-1 rounded-full border border-blue-100">
               {spec.label}: <span className="font-semibold">{spec.value}</span>
             </span>
           ))}
         </div>
 
         {/* Price and CTA Container - Bottom of card */}
-        <div className="mt-auto pt-3 border-t border-border space-y-3">
+        <div className="mt-auto pt-3 border-t border-gray-100 space-y-3">
           {/* Price - Teal/Turquoise color, large and bold */}
           <p className="text-xl font-mono font-bold text-primary tabular-nums">
             ₦{product.price.toLocaleString('en-NG')}
           </p>
 
-          {/* View Details Button - Full width on mobile, auto width on desktop */}
+          {/* View Details Button - Always visible on mobile, hover on desktop */}
           <Link
             href={`/products/${product.id}`}
-            className="w-full md:w-auto inline-block text-center px-4 py-3 min-h-touch bg-primary text-white text-sm font-sans font-semibold rounded hover:bg-primary-dark transition-colors"
+            className="block w-full text-center px-4 py-3 min-h-touch bg-primary text-white text-sm font-sans font-semibold rounded-lg hover:bg-primary-dark transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
             View Details

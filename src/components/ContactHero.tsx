@@ -25,10 +25,12 @@ export default function ContactHero({ title, subtitle, backgroundImage }: Contac
 
       {/* Hero Content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-sm md:px-lg">
-        <h1 className="text-3xl md:text-5xl lg:text-6xl text-white font-bold mb-sm max-w-4xl">
+        {/* H1: Fluid Typography - Mobile-First Responsive */}
+        <h1 className="text-2xl md:text-3xl lg:text-4xl text-white font-display font-bold mb-3 md:mb-4 max-w-4xl tracking-tight">
           {title}
         </h1>
-        <p className="text-lg md:text-xl lg:text-2xl text-white/90 max-w-2xl font-light">
+        {/* Subtitle: Proportional to H1 */}
+        <p className="text-sm md:text-base text-white/90 max-w-2xl font-sans leading-relaxed">
           {subtitle}
         </p>
       </div>

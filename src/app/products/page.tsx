@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import ProductGrid from '@/components/ProductGrid';
 import Pagination from '@/components/Pagination';
+import ProductFilterPanel from '@/components/ProductFilterPanel';
 import productsData from '@/data/products.json';
 import { Product, ProductCategory } from '@/lib/types';
 
@@ -15,25 +16,13 @@ const CATEGORIES: { value: ProductCategory; label: string }[] = [
   { value: 'accessories', label: 'Accessories' },
 ];
 
-// Helper function to round up prices to user-friendly values
-function roundUpPrice(price: number): number {
-  if (price === 0) return 10000; // Default minimum
-
-  // Determine the magnitude to round to
-  if (price <= 1000) return Math.ceil(price / 100) * 100; // Round to nearest 100
-  if (price <= 10000) return Math.ceil(price / 1000) * 1000; // Round to nearest 1,000
-  if (price <= 100000) return Math.ceil(price / 10000) * 10000; // Round to nearest 10,000
-  return Math.ceil(price / 100000) * 100000; // Round to nearest 100,000
-}
-
 function ProductsPageContent() {
   const searchParams = useSearchParams();
   const [category, setCategory] = useState<ProductCategory | null>(
     (searchParams.get('category') as ProductCategory) || null
   );
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000]); // Set high initial max to avoid filtering products
   const [brands, setBrands] = useState<Set<string>>(new Set());
-  const [showFilters, setShowFilters] = useState(true);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [dbProducts, setDbProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
@@ -91,6 +80,35 @@ function ProductsPageContent() {
     return products;
   }, [dbProducts]);
 
+  // Calculate the actual max price from all products (rounded up)
+  const actualMaxPrice = useMemo(() => {
+    if (allProducts.length === 0) return 1000000;
+
+    let productsToConsider = allProducts;
+    if (category) {
+      productsToConsider = allProducts.filter((p) => p.category === category);
+    }
+
+    const prices = productsToConsider.map((p) => p.price);
+    const max = Math.max(...prices);
+
+    // Round up to user-friendly value
+    if (max <= 1000) return Math.ceil(max / 100) * 100;
+    if (max <= 10000) return Math.ceil(max / 1000) * 1000;
+    if (max <= 100000) return Math.ceil(max / 10000) * 10000;
+    return Math.ceil(max / 100000) * 100000;
+  }, [allProducts, category]);
+
+  // Update price range max when products load or category changes
+  useEffect(() => {
+    // Only update if the current max is the initial placeholder value
+    // OR if the actual max is higher than current max (prevents filtering)
+    if (priceRange[1] === 1000000 || actualMaxPrice > priceRange[1]) {
+      setPriceRange((prev) => [prev[0], actualMaxPrice]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actualMaxPrice]);
+
   // Get unique brands based on selected category (dynamic, category-dependent)
   const uniqueBrands = useMemo(() => {
     let productsToConsider = allProducts;
@@ -103,32 +121,6 @@ function ProductsPageContent() {
     // Extract unique brand names and sort alphabetically
     return Array.from(new Set(productsToConsider.map((p) => p.brand))).sort();
   }, [allProducts, category]);
-
-  // Calculate max price based on current category (dynamically adjusts)
-  const categoryMaxPrice = useMemo(() => {
-    let productsToConsider = allProducts;
-
-    // If category is selected, only consider products in that category
-    if (category) {
-      productsToConsider = allProducts.filter((p) => p.category === category);
-    }
-
-    // Get the highest price
-    if (productsToConsider.length === 0) return 10000; // Default if no products
-    const categoryMax = Math.max(...productsToConsider.map((p) => p.price));
-
-    // Round up to nice round number
-    return roundUpPrice(categoryMax);
-  }, [allProducts, category]);
-
-  // Reset price range and brand selections when category changes
-  useEffect(() => {
-    setPriceRange([0, categoryMaxPrice]);
-    // Clear brand selections when switching categories to avoid showing irrelevant filters
-    setBrands(new Set());
-    // Reset to first page when filters change
-    setCurrentPage(1);
-  }, [category, categoryMaxPrice]);
 
   // Reset to first page when filters change
   useEffect(() => {
@@ -169,336 +161,81 @@ function ProductsPageContent() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleBrandToggle = (brand: string) => {
-    const newBrands = new Set(brands);
-    if (newBrands.has(brand)) {
-      newBrands.delete(brand);
-    } else {
-      newBrands.add(brand);
-    }
-    setBrands(newBrands);
-  };
-
-  const handleClearFilters = () => {
-    setCategory(null);
-    setPriceRange([0, categoryMaxPrice]);
-    setBrands(new Set());
-  };
-
-  const handleApplyFilters = () => {
-    setMobileFilterOpen(false);
-  };
-
   return (
     <div className="w-full">
-      <div className="max-w-screen-2xl mx-auto px-xs py-lg">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
         {/* Contextual Header Banner */}
-        <div className="mb-md md:mb-lg">
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-text-primary mb-xs">
+        <div className="mb-10">
+          {/* Meta-Data: Product Count */}
+          <span className="text-xs font-sans font-semibold text-text-secondary uppercase tracking-widest mb-2 block">
+            {isLoadingProducts ? (
+              'Loading products...'
+            ) : (
+              `${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''}`
+            )}
+          </span>
+
+          {/* H1: Fluid Typography */}
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold tracking-tight text-text-primary mb-3">
             All Solar Components
           </h1>
-          <p className="text-body text-text-secondary max-w-3xl">
+
+          {/* Description: Refined Typography */}
+          <p className="text-sm md:text-base text-text-secondary max-w-2xl leading-relaxed">
             Find high-efficiency solar panels, inverters, and batteries for your residential or commercial project.
           </p>
-          {isLoadingProducts && (
-            <p className="text-caption text-primary mt-xs">Loading products from database...</p>
-          )}
         </div>
 
-        {/* Mobile Filter Button - Always visible on mobile */}
+        {/* Mobile Filter Trigger Button - Full-width button below title */}
         <button
           type="button"
           onClick={() => setMobileFilterOpen(true)}
-          className="md:hidden w-full max-w-md mx-auto flex items-center justify-center gap-xs px-md py-sm bg-primary text-white hover:bg-primary-dark transition-colors rounded shadow-md mb-md font-sans font-semibold"
+          className="lg:hidden w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white hover:bg-primary-dark transition-colors rounded-lg shadow-sm mb-8 font-display font-semibold text-base min-h-[48px]"
           aria-label="Open filters"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
           </svg>
-          <span>Filter Products</span>
+          <span>Refine Search</span>
         </button>
 
-        {/* Mobile Filter Drawer - Full screen modal */}
-        {mobileFilterOpen && (
-          <div className="md:hidden fixed inset-0 z-50 bg-white overflow-y-auto">
-            {/* Header */}
-            <div className="sticky top-0 bg-white border-b border-border px-md py-sm flex items-center justify-between shadow-sm">
-              <h2 className="text-lg font-display font-semibold text-text-primary">Refine Your Search</h2>
-              <button
-                type="button"
-                onClick={() => setMobileFilterOpen(false)}
-                className="w-10 h-10 flex items-center justify-center hover:bg-background rounded-full transition-colors"
-                aria-label="Close filters"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Filter Content */}
-            <div className="p-md space-y-lg pb-32">
-              {/* Category Filter */}
-              <div>
-                <h3 className="text-base font-sans font-semibold text-text-primary mb-sm">Category</h3>
-                <div className="space-y-sm">
-                  <button
-                    type="button"
-                    onClick={() => setCategory(null)}
-                    className={`block w-full text-left text-base font-sans px-3 py-2 rounded transition-colors ${
-                      category === null ? 'bg-primary text-white font-semibold' : 'text-text-primary hover:bg-background'
-                    }`}
-                  >
-                    All Products
-                  </button>
-                  {CATEGORIES.map((cat) => (
-                    <button
-                      type="button"
-                      key={cat.value}
-                      onClick={() => setCategory(cat.value)}
-                      className={`block w-full text-left text-base font-sans px-3 py-2 rounded transition-colors ${
-                        category === cat.value ? 'bg-primary text-white font-semibold' : 'text-text-primary hover:bg-background'
-                      }`}
-                    >
-                      {cat.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price Filter */}
-              <div className="pt-md border-t border-border">
-                <h3 className="text-base font-sans font-semibold text-text-primary mb-sm">Price Range</h3>
-                <div className="space-y-md">
-                  <input
-                    type="range"
-                    min="0"
-                    max={categoryMaxPrice}
-                    value={priceRange[0]}
-                    onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
-                    className="w-full h-2"
-                    aria-label="Minimum price"
-                  />
-                  <input
-                    type="range"
-                    min="0"
-                    max={categoryMaxPrice}
-                    value={priceRange[1]}
-                    onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
-                    className="w-full h-2"
-                    aria-label="Maximum price"
-                  />
-                  <div className="text-sm font-mono font-bold text-text-primary">
-                    ₦{priceRange[0].toLocaleString('en-NG')} - ₦{priceRange[1].toLocaleString('en-NG')}
-                  </div>
-                </div>
-              </div>
-
-              {/* Brand Filter */}
-              {uniqueBrands.length > 0 && (
-                <div className="pt-md border-t border-border">
-                  <h3 className="text-base font-sans font-semibold text-text-primary mb-sm">Brand</h3>
-                  <div className="space-y-sm">
-                    {uniqueBrands.map((brand) => (
-                      <label key={brand} className="flex items-center gap-sm cursor-pointer py-xs">
-                        <input
-                          type="checkbox"
-                          checked={brands.has(brand)}
-                          onChange={() => handleBrandToggle(brand)}
-                          className="w-5 h-5 min-w-[20px] min-h-[20px]"
-                        />
-                        <span className="text-base font-sans text-text-primary">{brand}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Clear Filters */}
-              <button
-                type="button"
-                onClick={handleClearFilters}
-                className="w-full text-base font-sans text-primary hover:text-primary-dark font-medium pt-md border-t border-border text-center"
-              >
-                Clear All Filters
-              </button>
-            </div>
-
-            {/* Sticky Apply Filters CTA */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-border p-md shadow-lg">
-              <div className="max-w-md mx-auto">
-                <button
-                  type="button"
-                  onClick={handleApplyFilters}
-                  className="w-full bg-primary text-white font-display font-semibold py-4 rounded-lg hover:bg-primary-dark transition-colors shadow-md text-base"
-                >
-                  Apply Filters ({filteredProducts.length} {filteredProducts.length !== 1 ? 'products' : 'product'})
-                </button>
-                {totalPages > 1 && (
-                  <p className="text-center text-xs text-text-secondary mt-sm">
-                    Results shown across {totalPages} pages
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Floating Filter Toggle Button (when collapsed) - Desktop only */}
-        {!showFilters && (
-          <button
-            type="button"
-            onClick={() => setShowFilters(true)}
-            className="hidden md:flex fixed left-4 top-24 z-40 items-center gap-xs px-md py-sm bg-primary text-surface hover:bg-primary-dark transition-colors rounded shadow-lg"
-            aria-label="Show filters"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-            </svg>
-            <span className="text-body font-medium">Refine Search</span>
-          </button>
-        )}
-        <div className="flex flex-col md:flex-row gap-lg">
-          {/* Filters - Desktop Sidebar */}
-          {showFilters && (
-            <aside className="hidden md:block w-full md:w-64 flex-shrink-0 transition-all duration-300">
-              <div className="sticky top-20 space-y-md">
-              {/* Toggle Button */}
-              <button
-                type="button"
-                onClick={() => setShowFilters(!showFilters)}
-                className="w-full flex items-center justify-between p-sm bg-background hover:bg-border transition-colors rounded mb-md"
-                aria-label="Toggle filters"
-              >
-                <span className="text-body font-semibold text-text-primary">Refine Your Search</span>
-                <svg
-                  className={`w-5 h-5 transition-transform ${showFilters ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {/* Category Filter */}
-              <div>
-                <h3 className="text-body font-semibold text-text-primary mb-sm">Category</h3>
-                <div className="space-y-sm">
-                  <button
-                    type="button"
-                    onClick={() => setCategory(null)}
-                    className={`block w-full text-left text-caption px-3 py-2 rounded transition-colors ${
-                      category === null ? 'bg-primary text-white font-semibold' : 'text-text-primary hover:bg-background'
-                    }`}
-                  >
-                    All Products
-                  </button>
-                  {CATEGORIES.map((cat) => (
-                    <button
-                      type="button"
-                      key={cat.value}
-                      onClick={() => setCategory(cat.value)}
-                      className={`block w-full text-left text-caption px-3 py-2 rounded transition-colors ${
-                        category === cat.value ? 'bg-primary text-white font-semibold' : 'text-text-primary hover:bg-background'
-                      }`}
-                    >
-                      {cat.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price Filter */}
-              <div className="pt-md border-t border-border">
-                <h3 className="text-body font-medium text-text-primary mb-sm">Price Range</h3>
-                <div className="space-y-sm">
-                  <input
-                    type="range"
-                    min="0"
-                    max={categoryMaxPrice}
-                    value={priceRange[0]}
-                    onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
-                    className="w-full"
-                    aria-label="Minimum price"
-                  />
-                  <input
-                    type="range"
-                    min="0"
-                    max={categoryMaxPrice}
-                    value={priceRange[1]}
-                    onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
-                    className="w-full"
-                    aria-label="Maximum price"
-                  />
-                  <div className="text-caption text-text-secondary">
-                    ₦{priceRange[0].toLocaleString('en-NG')} - ₦{priceRange[1].toLocaleString('en-NG')}
-                  </div>
-                </div>
-              </div>
-
-              {/* Brand Filter */}
-              {uniqueBrands.length > 0 ? (
-                <div className="pt-md border-t border-border">
-                  <h3 className="text-body font-medium text-text-primary mb-sm">Brand</h3>
-                  <div className="space-y-sm max-h-48 overflow-y-auto">
-                    {uniqueBrands.map((brand) => (
-                      <label key={brand} className="flex items-center gap-sm cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={brands.has(brand)}
-                          onChange={() => handleBrandToggle(brand)}
-                          className="w-4 h-4"
-                        />
-                        <span className="text-caption text-text-primary">{brand}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="pt-md border-t border-border">
-                  <h3 className="text-body font-medium text-text-primary mb-sm">Brand</h3>
-                  <p className="text-caption text-text-secondary italic">
-                    No specific brands listed for this category.
-                  </p>
-                </div>
-              )}
-
-              {/* Clear Filters */}
-              <button
-                type="button"
-                onClick={handleClearFilters}
-                className="w-full text-caption text-primary hover:text-primary-dark font-medium pt-md border-t border-border"
-              >
-                Clear All Filters
-              </button>
-              </div>
-            </aside>
-          )}
+        {/* Adaptive Filter Panel Component */}
+        <div className="flex flex-col lg:flex-row gap-8">
+          <ProductFilterPanel
+            category={category}
+            priceRange={priceRange}
+            brands={brands}
+            onCategoryChange={setCategory}
+            onPriceRangeChange={setPriceRange}
+            onBrandsChange={setBrands}
+            allProducts={allProducts}
+            uniqueBrands={uniqueBrands}
+            isOpen={mobileFilterOpen}
+            onClose={() => setMobileFilterOpen(false)}
+            filteredCount={filteredProducts.length}
+          />
 
           {/* Products Section */}
           <div className="flex-1 min-w-0">
             {/* Filter Summary */}
-            <div className="mb-lg flex flex-wrap gap-sm items-center justify-between">
-              <div className="flex flex-wrap gap-sm items-center">
-                <span className="text-caption text-text-secondary">
-                  {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
-                  {totalPages > 1 && (
-                    <span className="ml-xs">
-                      (Page {currentPage} of {totalPages})
-                    </span>
-                  )}
-                </span>
+            <div className="mb-6 flex flex-wrap gap-2 items-center justify-between">
+              <div className="flex flex-wrap gap-2 items-center">
+                {totalPages > 1 && (
+                  <span className="text-xs font-sans text-text-secondary">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                )}
 
                 {/* Active Filters - Mobile */}
-                <div className="flex flex-wrap gap-sm md:hidden">
+                <div className="flex flex-wrap gap-2 md:hidden">
                   {category && (
                     <button
                       type="button"
                       onClick={() => setCategory(null)}
-                      className="text-xs bg-background px-sm py-xs rounded flex items-center gap-xs hover:bg-border"
+                      className="text-xs bg-background px-3 py-1.5 rounded-md flex items-center gap-2 hover:bg-border transition-colors min-h-[32px]"
                     >
                       {CATEGORIES.find((c) => c.value === category)?.label}
-                      <span>✕</span>
+                      <span aria-hidden="true">✕</span>
                     </button>
                   )}
                 </div>
@@ -516,14 +253,16 @@ function ProductsPageContent() {
             />
 
             {/* CTA Section */}
-            <div className="mt-2xl bg-primary/10 border border-primary/20 rounded-lg p-xl text-center">
-              <h3 className="text-xl md:text-2xl text-text-primary font-medium mb-sm">Need Help Choosing?</h3>
-              <p className="text-body text-text-secondary mb-lg max-w-2xl mx-auto">
+            <div className="mt-12 md:mt-16 bg-primary/10 border border-primary/20 rounded-lg p-6 md:p-8 text-center">
+              <h3 className="text-xl md:text-2xl font-display font-semibold tracking-tight text-text-primary mb-3">
+                Need Help Choosing?
+              </h3>
+              <p className="text-sm md:text-base text-text-secondary mb-6 max-w-2xl mx-auto leading-relaxed">
                 Our solar experts can help you find the perfect system for your needs and provide a personalized quote.
               </p>
               <Link
                 href="/quote"
-                className="inline-block bg-primary text-surface px-xl py-md min-h-touch font-medium hover:bg-primary-dark transition-colors shadow-md rounded"
+                className="inline-block bg-primary text-surface px-8 py-3 min-h-[48px] font-display font-semibold hover:bg-primary-dark transition-colors shadow-md rounded-lg"
               >
                 Get Your Free Quote
               </Link>
