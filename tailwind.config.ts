@@ -71,6 +71,10 @@ const config: Config = {
           '0%': { opacity: '0', transform: 'translateY(1rem)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        videoFadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
         slideInRight: {
           '0%': { transform: 'translateX(100%)', opacity: '0' },
           '100%': { transform: 'translateX(0)', opacity: '1' },
@@ -90,6 +94,7 @@ const config: Config = {
       },
       animation: {
         fadeIn: 'fadeIn 0.3s ease-out',
+        'video-fade-in': 'videoFadeIn 1s ease-in 0.3s forwards',
         'slide-in-right': 'slideInRight 0.3s ease-out',
         'slide-out-right': 'slideOutRight 0.2s ease-in',
         'modal-enter': 'modalEnter 0.3s ease-out',

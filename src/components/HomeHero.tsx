@@ -11,8 +11,8 @@ export default function HomeHero() {
     const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
     const isSlow = connection?.saveData || connection?.effectiveType === 'slow-2g' || connection?.effectiveType === '2g' || connection?.effectiveType === '3g';
 
-    // Only load video on good connections and larger screens
-    if (!isSlow && window.innerWidth >= 768) {
+    // Only load video on good connections
+    if (!isSlow) {
       setShouldLoadVideo(true);
     }
   }, []);
@@ -23,7 +23,7 @@ export default function HomeHero() {
   };
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden">
+    <section className="relative h-[calc(100vh-var(--header-height))] w-full overflow-hidden">
       {/* High-Performance Poster Image - Loads First (850KB) */}
       <div className="absolute inset-0">
         <Image
@@ -47,7 +47,7 @@ export default function HomeHero() {
           playsInline
           preload="auto"
           aria-label="Play background video of solar installations"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover opacity-0 animate-video-fade-in"
         >
           <source src="/hero-video.mp4" type="video/mp4" />
         </video>
@@ -57,7 +57,7 @@ export default function HomeHero() {
       <div className="absolute inset-0 bg-black/50" />
 
       {/* Hero Content - Minimalist Text-on-Video Design */}
-      <div className="relative min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 text-center max-w-5xl mx-auto">
+      <div className="relative h-full flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 text-center max-w-5xl mx-auto">
         {/* H1: SEO-Optimized with Heavy Text Shadow for Readability */}
         <h1 className="text-3xl md:text-5xl lg:text-7xl font-extrabold tracking-tight text-white mb-6 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
           Power Your Future with Premium Solar Solutions
