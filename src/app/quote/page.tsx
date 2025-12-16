@@ -126,7 +126,7 @@ export default function QuotePage() {
       <div className="max-w-3xl mx-auto px-sm py-lg">
         {/* Header */}
         <div className="text-center mb-2xl">
-          <h1 className="text-h1 text-text-primary font-bold mb-md">Get Your Free Solar Quote</h1>
+          <h1 className="text-3xl md:text-5xl lg:text-6xl text-text-primary font-bold mb-md">Get Your Free Solar Quote</h1>
           <p className="text-body text-text-secondary">
             Complete this quick form to receive a personalized solar energy quote tailored to your needs.
           </p>
@@ -134,7 +134,7 @@ export default function QuotePage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="bg-surface border border-border rounded-lg p-xl shadow-md">
-          <div className="space-y-lg">
+          <div className="space-y-6">
             {/* Project Type */}
             <div>
               <label className="block text-body text-text-primary font-medium mb-sm">
@@ -271,7 +271,7 @@ export default function QuotePage() {
               </Link>
               <button
                 type="submit"
-                className="w-full sm:w-auto max-w-md px-xl py-md min-h-touch bg-primary text-surface font-medium hover:bg-primary-dark transition-colors rounded shadow-md"
+                className="w-full md:w-auto max-w-md px-xl py-md min-h-touch bg-primary text-surface font-medium hover:bg-primary-dark transition-colors rounded shadow-md"
               >
                 Get My Free Quote
               </button>
@@ -285,7 +285,7 @@ export default function QuotePage() {
             <div className="bg-surface border border-border rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               {/* Modal Header */}
               <div className="sticky top-0 bg-primary text-surface p-lg border-b border-primary-dark">
-                <h2 className="text-h2 font-bold">Review Your Quote Request</h2>
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold">Review Your Quote Request</h2>
                 <p className="text-body mt-xs opacity-90">Please verify your information before submitting</p>
               </div>
 
@@ -359,7 +359,7 @@ export default function QuotePage() {
                     type="button"
                     onClick={() => setShowSummary(false)}
                     disabled={isSubmitting}
-                    className="w-full sm:w-auto px-lg py-md text-body text-text-secondary hover:text-text-primary hover:bg-border transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full md:w-auto px-lg py-md text-body text-text-secondary hover:text-text-primary hover:bg-border transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed min-h-touch"
                   >
                     Go Back & Edit
                   </button>
@@ -367,7 +367,7 @@ export default function QuotePage() {
                     type="button"
                     onClick={handleConfirmSubmit}
                     disabled={isSubmitting}
-                    className="w-full sm:w-auto max-w-md px-xl py-md min-h-touch bg-primary text-surface font-medium hover:bg-primary-dark transition-colors rounded shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full md:w-auto max-w-md px-xl py-md min-h-touch bg-primary text-surface font-medium hover:bg-primary-dark transition-colors rounded shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? 'Submitting...' : 'Confirm & Submit Quote Request'}
                   </button>

@@ -2,6 +2,7 @@
 
 import { useState, useRef, DragEvent } from 'react';
 import Image from 'next/image';
+import imageCompression from 'browser-image-compression';
 import { MediaFile } from '@/lib/types';
 
 interface FileUploaderProps {
@@ -47,6 +48,33 @@ export default function FileUploader({
     }
   };
 
+  const compressImage = async (file: File): Promise<File> => {
+    // Only compress images, not videos
+    if (!file.type.startsWith('image/')) {
+      return file;
+    }
+
+    try {
+      const options = {
+        maxSizeMB: 1, // Max file size 1MB after compression
+        maxWidthOrHeight: 1200, // Max dimension 1200px
+        useWebWorker: true,
+        quality: 0.8, // 80% quality (imperceptible loss)
+        fileType: file.type === 'image/png' ? 'image/jpeg' : undefined, // Convert PNG to JPG
+      };
+
+      console.log(`[FileUploader] Compressing ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)...`);
+      const compressedFile = await imageCompression(file, options);
+      console.log(`[FileUploader] Compressed to ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB (${((1 - compressedFile.size / file.size) * 100).toFixed(0)}% reduction)`);
+
+      return compressedFile;
+    } catch (error) {
+      console.error('Compression error:', error);
+      // If compression fails, return original file
+      return file;
+    }
+  };
+
   const uploadFiles = async (files: File[]) => {
     if (value.length + files.length > maxFiles) {
       alert(`Maximum ${maxFiles} files allowed`);
@@ -57,8 +85,23 @@ export default function FileUploader({
     setUploadProgress(0);
 
     try {
+      // Compress images before upload
+      console.log(`[FileUploader] Processing ${files.length} files...`);
+      const compressedFiles: File[] = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        setUploadProgress(Math.round((i / files.length) * 50)); // First 50% for compression
+
+        const processedFile = await compressImage(file);
+        compressedFiles.push(processedFile);
+      }
+
+      console.log(`[FileUploader] Uploading ${compressedFiles.length} files to Cloudinary...`);
+      setUploadProgress(50); // Start upload phase
+
       const formData = new FormData();
-      files.forEach(file => formData.append('files', file));
+      compressedFiles.forEach(file => formData.append('files', file));
 
       const response = await fetch('/api/admin/upload', {
         method: 'POST',
@@ -68,6 +111,8 @@ export default function FileUploader({
         body: formData,
       });
 
+      setUploadProgress(90); // Almost done
+
       const data = await response.json();
 
       if (data.success) {
@@ -76,6 +121,8 @@ export default function FileUploader({
           order: value.length + index,
         }));
         onChange([...value, ...newFiles]);
+        setUploadProgress(100);
+        console.log(`[FileUploader] ✅ Successfully uploaded ${newFiles.length} files`);
       } else {
         alert(data.error || 'Upload failed');
       }

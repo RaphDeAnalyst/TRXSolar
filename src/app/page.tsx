@@ -6,22 +6,34 @@ import { Product } from '@/lib/types';
 
 async function getProducts() {
   try {
-    // Fetch from public API
+    // Fetch ONLY featured products from API (PERFORMANCE OPTIMIZATION)
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/products`, {
-      cache: 'no-store' // Always get fresh data
-    });
+    const response = await fetch(
+      `${baseUrl}/api/products?featured=true&fields=featured&limit=6`,
+      {
+        // PHASE 3: Enable edge caching with revalidation
+        cache: 'force-cache',
+        next: {
+          tags: ['featured-products'],
+          revalidate: 3600 // Revalidate every hour
+        }
+      }
+    );
 
     if (response.ok) {
       const data = await response.json();
       if (data.success && data.products) {
+        console.log(`[Homepage] Loaded ${data.products.length} featured products`);
+        if (data._performance) {
+          console.log(`[Homepage] 📊 Performance: Query ${data._performance.query_ms}ms, Total ${data._performance.total_ms}ms`);
+        }
         return data.products.map((p: any) => ({
           id: p.id?.toString() || `db-${p.name}`,
           name: p.name,
           brand: p.brand || 'Unknown',
           category: p.category || 'solar-panels',
           price: parseFloat(p.price) || 0,
-          image: p.image_url || p.image || '/images/placeholder.jpg',
+          image: p.image || '/images/placeholder.jpg',
           media: typeof p.media === 'string' ? JSON.parse(p.media) : (p.media || []),
           description: p.description || '',
           specs: typeof p.specs === 'string' ? JSON.parse(p.specs) : (p.specs || {}),
@@ -30,24 +42,22 @@ async function getProducts() {
       }
     }
   } catch (error) {
-    console.error('Failed to load database products:', error);
+    console.error('[Homepage] Failed to load featured products:', error);
   }
   return [];
 }
 
 export default async function Home() {
-  // Get database products
-  const dbProducts = await getProducts();
+  // Get featured products from database (already filtered and limited to 6)
+  const featuredProducts = await getProducts();
 
-  // Get featured products from all categories (JSON + database)
+  // Get all products for carousel images (JSON + featured products)
   const allProducts: Product[] = [
     ...(productsData['solar-panels'] as Product[]),
     ...(productsData.inverters as Product[]),
     ...(productsData.batteries as Product[]),
-    ...dbProducts
+    ...featuredProducts
   ];
-
-  const featuredProducts = allProducts.filter((p) => p.featured).slice(0, 6);
 
   // Extract images for carousels from database products
   const solarPanelImages = allProducts
@@ -69,7 +79,7 @@ export default async function Home() {
           <ImageCarousel images={solarPanelImages} alt="Solar Panel" />
           <div className="absolute inset-0 flex items-center justify-center bg-black/80">
             <div className="text-center text-white px-md md:px-lg max-w-2xl mx-auto">
-              <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-md text-white">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight mb-md text-white">
                 High-Efficiency Solar Panels
               </h1>
               <p className="text-lg font-sans leading-relaxed mb-lg max-w-md mx-auto text-white">
@@ -90,7 +100,7 @@ export default async function Home() {
           <ImageCarousel images={inverterImages} alt="Inverter" />
           <div className="absolute inset-0 flex items-center justify-center bg-black/80">
             <div className="text-center text-white px-md md:px-lg max-w-2xl mx-auto">
-              <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-md text-white">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight mb-md text-white">
                 Reliable Power Inverters
               </h1>
               <p className="text-lg font-sans leading-relaxed mb-lg max-w-md mx-auto text-white">
@@ -111,7 +121,7 @@ export default async function Home() {
         {/* Categories Section */}
         <section className="py-lg px-sm">
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-h2 text-text-primary mb-lg font-medium">Shop by Category</h2>
+          <h2 className="text-2xl md:text-3xl lg:text-4xl text-text-primary mb-lg font-medium">Shop by Category</h2>
 
           <div className="flex flex-wrap justify-center gap-md">
             <Link
@@ -146,10 +156,10 @@ export default async function Home() {
       {featuredProducts.length > 0 && (
         <section className="py-lg px-sm bg-background">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-h2 text-text-primary mb-lg font-medium">Featured Products</h2>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl text-text-primary mb-lg font-medium">Featured Products</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
-              {featuredProducts.map((product) => (
+              {featuredProducts.map((product: Product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
@@ -160,7 +170,7 @@ export default async function Home() {
       {/* Why Choose Us */}
       <section className="py-lg px-sm">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-h2 text-text-primary mb-lg font-medium">Why Choose VCSolar</h2>
+          <h2 className="text-2xl md:text-3xl lg:text-4xl text-text-primary mb-lg font-medium">Why Choose VCSolar</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
             <div className="bg-surface border border-border p-md">
@@ -193,7 +203,7 @@ export default async function Home() {
       {/* CTA Section */}
       <section className="py-lg px-sm bg-text-primary text-surface">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-h2 text-surface mb-md font-medium">Ready to Go Solar?</h2>
+          <h2 className="text-2xl md:text-3xl lg:text-4xl text-surface mb-md font-medium">Ready to Go Solar?</h2>
           <p className="text-body mb-lg">
             Get in touch with our team to discuss your solar energy needs and find the perfect solution.
           </p>

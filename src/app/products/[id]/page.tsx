@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
 import ProductImageGallery from '@/components/ProductImageGallery';
 import ProductCTAButtons from '@/components/ProductCTAButtons';
 import WarrantyBadge from '@/components/WarrantyBadge';
@@ -15,10 +16,10 @@ interface ProductPageProps {
 }
 
 // Helper function to fetch products from API
-async function fetchAllProducts(): Promise<Product[]> {
+async function fetchAllProducts(fields: 'card' | 'full' = 'card'): Promise<Product[]> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/products`, {
+    const response = await fetch(`${baseUrl}/api/products?fields=${fields}`, {
       cache: 'no-store',
     });
 
@@ -51,8 +52,10 @@ export async function generateStaticParams() {
   }));
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
+// Generate metadata for SEO
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { id } = await params;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vcsolar.shop';
 
   // Find product in JSON first
   let product: Product | undefined;
@@ -67,7 +70,71 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   // If not found in JSON, try database
   if (!product) {
-    const dbProducts = await fetchAllProducts();
+    const dbProducts = await fetchAllProducts('full');
+    product = dbProducts.find((p) => p.id.toString() === id);
+  }
+
+  if (!product) {
+    return {
+      title: 'Product Not Found',
+      description: 'The requested product could not be found.',
+    };
+  }
+
+  const productUrl = `${baseUrl}/products/${product.id}`;
+  const imageUrl = product.media && product.media.length > 0
+    ? product.media[0].url
+    : product.image;
+
+  return {
+    title: `${product.name} | VCSolar - Premium Solar Solutions`,
+    description: `${product.description} - ${product.brand} ${product.category.replace('-', ' ')}. ₦${product.price.toLocaleString('en-NG')}. High-quality solar equipment in Nigeria.`,
+    keywords: `${product.name}, ${product.brand}, ${product.category.replace('-', ' ')}, solar energy, Nigeria, VCSolar`,
+    openGraph: {
+      title: `${product.name} | VCSolar`,
+      description: product.description,
+      url: productUrl,
+      siteName: 'VCSolar',
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: product.name,
+        },
+      ],
+      locale: 'en_NG',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${product.name} | VCSolar`,
+      description: product.description,
+      images: [imageUrl],
+    },
+    alternates: {
+      canonical: productUrl,
+    },
+  };
+}
+
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { id } = await params;
+
+  // Find product in JSON first
+  let product: Product | undefined;
+
+  for (const [, products] of Object.entries(productsData)) {
+    const found = (products as Product[]).find((p) => p.id === id);
+    if (found) {
+      product = found;
+      break;
+    }
+  }
+
+  // If not found in JSON, try database with full fields for specs
+  if (!product) {
+    const dbProducts = await fetchAllProducts('full');
     product = dbProducts.find((p) => p.id.toString() === id);
   }
 
@@ -83,8 +150,45 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const dbProducts = await fetchAllProducts();
   const allProducts = [...jsonProducts, ...dbProducts];
 
+  // Generate Product Schema for SEO
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vcsolar.shop';
+  const imageUrl = product.media && product.media.length > 0
+    ? product.media[0].url
+    : product.image;
+
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description,
+    image: imageUrl,
+    brand: {
+      '@type': 'Brand',
+      name: product.brand,
+    },
+    offers: {
+      '@type': 'Offer',
+      url: `${baseUrl}/products/${product.id}`,
+      priceCurrency: 'NGN',
+      price: product.price,
+      availability: 'https://schema.org/InStock',
+      priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+    },
+    category: product.category.replace('-', ' '),
+  };
+
+  // Add aggregateRating if warranty info is available (optional enhancement)
+  if (product.specs.warranty) {
+    (productSchema as any).warranty = String(product.specs.warranty);
+  }
+
   return (
     <div className="w-full">
+      {/* Product Schema JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
       {/* Breadcrumb */}
       <div className="bg-background border-b border-border px-sm py-sm">
         <div className="max-w-7xl mx-auto">
@@ -124,7 +228,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             {/* Title */}
             <div>
-              <h1 className="text-h1 text-text-primary font-bold mb-sm">{product.name}</h1>
+              <h1 className="text-3xl md:text-5xl lg:text-6xl text-text-primary font-bold mb-sm">{product.name}</h1>
               <p className="text-body text-text-secondary">{product.brand}</p>
             </div>
 
@@ -150,7 +254,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </h3>
               <div className="divide-y divide-border">
                 {Object.entries(product.specs).map(([key, value]) => (
-                  <div key={key} className="flex justify-between p-md">
+                  <div key={key} className="flex justify-between px-md py-sm">
                     <span className="text-body text-text-primary font-medium capitalize">
                       {key.replace(/_/g, ' ')}
                     </span>

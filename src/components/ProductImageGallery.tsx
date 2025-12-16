@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { MediaFile } from '@/lib/types';
+import { transformCloudinaryUrl } from '@/lib/cloudinary-client';
 
 interface ProductImageGalleryProps {
   productName: string;
@@ -88,27 +89,44 @@ export default function ProductImageGallery({ productName, images, media }: Prod
   };
 
   // Render media item (image or video)
-  const renderMediaItem = (item: MediaFile, className?: string, priority?: boolean) => {
+  const renderMediaItem = (item: MediaFile, className?: string, priority?: boolean, size?: 'thumbnail' | 'main' | 'lightbox') => {
     if (item.type === 'video') {
+      // Optimize video thumbnail with Cloudinary
+      const optimizedThumbnail = transformCloudinaryUrl(item.thumbnail_url || item.url, {
+        width: size === 'thumbnail' ? 200 : size === 'main' ? 800 : 1600,
+        quality: 'auto',
+        format: 'auto',
+        crop: 'limit'
+      });
+
       return (
         <video
           src={item.url}
           controls
           className={className || 'object-contain w-full h-full'}
-          poster={item.thumbnail_url}
+          poster={optimizedThumbnail}
         >
           Your browser does not support the video tag.
         </video>
       );
     }
 
+    // Optimize image URL with Cloudinary transformations based on size
+    const optimizedUrl = transformCloudinaryUrl(item.url, {
+      width: size === 'thumbnail' ? 200 : size === 'main' ? 1200 : 1600,
+      quality: 'auto',
+      format: 'auto',
+      crop: 'limit'
+    });
+
     return (
       <Image
-        src={item.url}
+        src={optimizedUrl}
         alt={productName}
         fill
         className={className || 'object-contain'}
         priority={priority}
+        loading={priority ? 'eager' : 'lazy'}
       />
     );
   };
@@ -176,7 +194,7 @@ export default function ProductImageGallery({ productName, images, media }: Prod
         className="relative w-full h-full max-w-7xl max-h-[90vh] mx-auto p-4"
         onClick={(e) => e.stopPropagation()}
       >
-        {renderMediaItem(mediaItems[lightboxIndex], 'object-contain', true)}
+        {renderMediaItem(mediaItems[lightboxIndex], 'object-contain', true, 'lightbox')}
       </div>
 
       {/* Next button */}
@@ -223,10 +241,16 @@ export default function ProductImageGallery({ productName, images, media }: Prod
               aria-label={`View ${item.type} ${idx + 1}`}
             >
               <Image
-                src={item.thumbnail_url || item.url}
+                src={transformCloudinaryUrl(item.thumbnail_url || item.url, {
+                  width: 64,
+                  quality: 'auto',
+                  format: 'auto',
+                  crop: 'fill'
+                })}
                 alt={`${productName} thumbnail ${idx + 1}`}
                 fill
                 className="object-cover rounded"
+                loading="lazy"
               />
               {item.type === 'video' && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/30">
@@ -266,25 +290,7 @@ export default function ProductImageGallery({ productName, images, media }: Prod
           className="bg-background aspect-square relative w-full cursor-zoom-in hover:opacity-90 transition-opacity overflow-hidden"
           aria-label="Open media in full screen"
         >
-          {item.type === 'video' ? (
-            <video
-              src={item.url}
-              poster={item.thumbnail_url}
-              className="w-full h-full object-cover"
-              onClick={(e) => {
-                e.stopPropagation();
-                (e.target as HTMLVideoElement).play();
-              }}
-            />
-          ) : (
-            <Image
-              src={item.url}
-              alt={productName}
-              fill
-              className="object-cover"
-              priority
-            />
-          )}
+          {renderMediaItem(item, 'object-cover', true, 'main')}
         </button>
 
         {/* Lightbox Modal */}
@@ -304,23 +310,9 @@ export default function ProductImageGallery({ productName, images, media }: Prod
           className="bg-background aspect-square relative mb-md w-full cursor-zoom-in hover:opacity-90 transition-opacity overflow-hidden"
           aria-label="Open media in full screen"
         >
-          {activeItem.type === 'video' ? (
-            <video
-              src={activeItem.url}
-              poster={activeItem.thumbnail_url}
-              className="w-full h-full object-cover"
-              controls
-              onClick={(e) => e.stopPropagation()}
-            />
-          ) : (
+          {renderMediaItem(activeItem, 'object-cover', true, 'main')}
+          {activeItem.type === 'image' && (
             <>
-              <Image
-                src={activeItem.url}
-                alt={`${productName} - View ${activeIndex + 1}`}
-                fill
-                className="object-cover"
-                priority
-              />
               {/* Zoom indicator */}
               <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-xs flex items-center gap-1">
                 <svg
@@ -356,10 +348,16 @@ export default function ProductImageGallery({ productName, images, media }: Prod
               aria-label={`View ${item.type} ${idx + 1}`}
             >
               <Image
-                src={item.thumbnail_url || item.url}
+                src={transformCloudinaryUrl(item.thumbnail_url || item.url, {
+                  width: 200,
+                  quality: 'auto',
+                  format: 'auto',
+                  crop: 'fill'
+                })}
                 alt={`${productName} thumbnail ${idx + 1}`}
                 fill
                 className="object-cover"
+                loading="lazy"
               />
               {item.type === 'video' && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/30">

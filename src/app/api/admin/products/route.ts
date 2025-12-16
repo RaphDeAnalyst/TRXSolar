@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { checkAdminAuth, unauthorizedResponse } from '@/lib/auth';
+import { revalidateProductCache } from '@/lib/cache';
+import { revalidateProductSitemap } from '@/lib/sitemap-utils';
 
 // GET all products
 export async function GET(request: NextRequest) {
@@ -66,9 +68,16 @@ export async function POST(request: NextRequest) {
       RETURNING *
     `;
 
+    // PHASE 3: Revalidate caches and sitemap after product creation
+    await revalidateProductCache(category, featured);
+    await revalidateProductSitemap();
+
+    console.log('[Admin API] Product created, caches invalidated, and sitemap updated:', result.rows[0].id);
+
     return NextResponse.json({
       success: true,
-      product: result.rows[0]
+      product: result.rows[0],
+      message: 'Product created and caches updated'
     });
   } catch (error) {
     console.error('Error creating product:', error);

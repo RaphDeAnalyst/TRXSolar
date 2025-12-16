@@ -41,7 +41,7 @@ export default function FAQPage() {
   return (
     <div className="w-full">
       <div className="max-w-3xl mx-auto px-sm py-lg">
-        <h1 className="text-h1 text-text-primary font-bold mb-lg">Frequently Asked Questions</h1>
+        <h1 className="text-3xl md:text-5xl lg:text-6xl text-text-primary font-bold mb-lg">Frequently Asked Questions</h1>
 
         <div className="space-y-sm">
           {FAQItems.map((item, idx) => (

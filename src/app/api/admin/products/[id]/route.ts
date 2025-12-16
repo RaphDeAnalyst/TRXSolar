@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { checkAdminAuth, unauthorizedResponse } from '@/lib/auth';
+import { revalidateProductCache, revalidateAllProductCaches } from '@/lib/cache';
+import { revalidateProductSitemap } from '@/lib/sitemap-utils';
 
 // GET single product
 export async function GET(
@@ -79,9 +81,16 @@ export async function PUT(
       );
     }
 
+    // PHASE 3: Revalidate caches and sitemap after product update
+    await revalidateProductCache(category, featured);
+    await revalidateProductSitemap();
+
+    console.log('[Admin API] Product updated, caches invalidated, and sitemap updated:', id);
+
     return NextResponse.json({
       success: true,
-      product: result.rows[0]
+      product: result.rows[0],
+      message: 'Product updated and caches refreshed'
     });
   } catch (error) {
     console.error('Error updating product:', error);
@@ -103,6 +112,14 @@ export async function DELETE(
 
   try {
     const { id } = await params;
+
+    // Fetch product before deletion to get category/featured status for cache invalidation
+    const productResult = await sql`
+      SELECT category, featured FROM products WHERE id = ${id}
+    `;
+
+    const product = productResult.rows[0];
+
     const result = await sql`
       DELETE FROM products WHERE id = ${id}
       RETURNING id
@@ -115,9 +132,20 @@ export async function DELETE(
       );
     }
 
+    // PHASE 3: Revalidate caches and sitemap after product deletion
+    if (product) {
+      await revalidateProductCache(product.category, product.featured);
+    } else {
+      // If we couldn't get product info, revalidate everything to be safe
+      await revalidateAllProductCaches();
+    }
+    await revalidateProductSitemap();
+
+    console.log('[Admin API] Product deleted, caches invalidated, and sitemap updated:', id);
+
     return NextResponse.json({
       success: true,
-      message: 'Product deleted successfully'
+      message: 'Product deleted successfully and caches updated'
     });
   } catch (error) {
     console.error('Error deleting product:', error);

@@ -10,6 +10,41 @@ import TrustElements from '@/components/TrustElements';
 export default function ContactPage() {
   const [selectedIntent, setSelectedIntent] = useState<'estimate' | 'inquiry' | null>(null);
 
+  // LocalBusiness Schema for SEO
+  const localBusinessSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: 'VCSolar',
+    image: 'https://vcsolar.shop/solar_tech_banner.jpg',
+    '@id': 'https://vcsolar.shop',
+    url: 'https://vcsolar.shop',
+    telephone: '+2348108698673',
+    email: 'sales@vcsolar.com',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'F-Line F1720, Alaba International Market',
+      addressLocality: 'Oja',
+      addressRegion: 'Lagos State',
+      addressCountry: 'NG',
+    },
+    openingHoursSpecification: {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '08:30',
+      closes: '17:30',
+    },
+    priceRange: '$$',
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.8',
+      reviewCount: '127',
+    },
+    sameAs: [
+      'https://www.facebook.com/vcsolar',
+      'https://www.instagram.com/vcsolar',
+    ],
+  };
+
   const handleIntentChange = (intent: 'estimate' | 'inquiry') => {
     // Clear previous selection and set new intent
     // This ensures form data is cleared when switching
@@ -19,6 +54,12 @@ export default function ContactPage() {
 
   return (
     <div className="w-full min-h-screen bg-background">
+      {/* LocalBusiness Schema JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+      />
+
       {/* Hero Section */}
       <ContactHero
         title="Start Your Solar Journey"

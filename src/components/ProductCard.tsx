@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Product } from '@/lib/types';
 import { toggleWishlistItem, isProductInWishlist } from '@/lib/wishlist';
+import { transformCloudinaryUrl } from '@/lib/cloudinary-client';
 
 interface ProductCardProps {
   product: Product;
@@ -43,18 +44,27 @@ export default function ProductCard({ product }: ProductCardProps) {
       value: value.toString(),
     }));
 
+  // Optimize image URL with Cloudinary transformations
+  const optimizedImageUrl = transformCloudinaryUrl(product.image, {
+    width: 600,
+    quality: 'auto',
+    format: 'auto',
+    crop: 'limit'
+  });
+
   return (
     <article className="bg-surface hover:shadow-lg cursor-pointer transition-shadow h-full flex flex-col">
       {/* Image Container - 4:5 aspect ratio */}
       <div className="relative w-full aspect-[4/5] bg-background overflow-hidden">
         <Link href={`/products/${product.id}`}>
           <Image
-            src={product.image}
+            src={optimizedImageUrl}
             alt={product.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 400px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             priority={product.featured}
+            loading={product.featured ? 'eager' : 'lazy'}
           />
         </Link>
 

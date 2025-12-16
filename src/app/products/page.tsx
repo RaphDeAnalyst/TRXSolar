@@ -40,12 +40,13 @@ function ProductsPageContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const PRODUCTS_PER_PAGE = 12;
 
-  // Fetch products from database on mount
+  // Fetch products from database on mount (with minimal fields for performance)
   useEffect(() => {
     const fetchDatabaseProducts = async () => {
       try {
         console.log('[Products Page] Fetching products from /api/products...');
-        const response = await fetch('/api/products');
+        // Request only card fields to minimize payload (PERFORMANCE OPTIMIZATION)
+        const response = await fetch('/api/products?fields=card');
         console.log('[Products Page] Response status:', response.status, response.statusText);
 
         if (response.ok) {
@@ -54,6 +55,9 @@ function ProductsPageContent() {
 
           if (data.success && data.products) {
             console.log(`[Products Page] ✅ Loaded ${data.products.length} products from database`);
+            if (data._performance) {
+              console.log(`[Products Page] 📊 Performance: Query ${data._performance.query_ms}ms, Total ${data._performance.total_ms}ms`);
+            }
             setDbProducts(data.products);
           } else {
             console.warn('[Products Page] ⚠️ API returned success:false or no products array');
@@ -190,7 +194,7 @@ function ProductsPageContent() {
       <div className="max-w-screen-2xl mx-auto px-xs py-lg">
         {/* Contextual Header Banner */}
         <div className="mb-md md:mb-lg">
-          <h1 className="text-h2 md:text-h1 font-display font-bold text-text-primary mb-xs">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-text-primary mb-xs">
             All Solar Components
           </h1>
           <p className="text-body text-text-secondary max-w-3xl">
@@ -513,7 +517,7 @@ function ProductsPageContent() {
 
             {/* CTA Section */}
             <div className="mt-2xl bg-primary/10 border border-primary/20 rounded-lg p-xl text-center">
-              <h3 className="text-h3 text-text-primary font-medium mb-sm">Need Help Choosing?</h3>
+              <h3 className="text-xl md:text-2xl text-text-primary font-medium mb-sm">Need Help Choosing?</h3>
               <p className="text-body text-text-secondary mb-lg max-w-2xl mx-auto">
                 Our solar experts can help you find the perfect system for your needs and provide a personalized quote.
               </p>

@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkAdminAuth, unauthorizedResponse } from '@/lib/auth';
 import cloudinary, { validateFile, FILE_VALIDATION } from '@/lib/cloudinary';
 
-// Maximum duration for video uploads
-export const maxDuration = 60; // 60 seconds
+// Maximum duration for video uploads (increased for reliability)
+export const maxDuration = 120; // 120 seconds
 
 export async function POST(request: NextRequest) {
   console.log('📤 [Upload] POST request received');
@@ -81,10 +81,8 @@ export async function POST(request: NextRequest) {
           {
             folder: 'vcsolar/products',
             resource_type: isVideo ? 'video' : 'image',
-            transformation: isVideo ? [] : [
-              { width: 1200, height: 1200, crop: 'limit', quality: 'auto' },
-            ],
-            eager: isVideo ? [{ width: 400, height: 400, crop: 'fill', format: 'jpg' }] : [],
+            // Removed transformations - will be done at URL-time via transformCloudinaryUrl()
+            // This makes uploads faster and more flexible
           },
           (error, result) => {
             if (error) {

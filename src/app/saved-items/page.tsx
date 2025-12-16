@@ -29,12 +29,26 @@ export default function SavedItemsPage() {
     };
   }, []);
 
-  // Fetch products from database on mount
+  // Fetch ONLY wishlist products from database (optimized batch fetch)
   useEffect(() => {
-    const fetchDatabaseProducts = async () => {
+    const fetchWishlistProducts = async () => {
       try {
-        console.log('[Saved Items] Fetching products from /api/products...');
-        const response = await fetch('/api/products');
+        // Get wishlist IDs from localStorage
+        const wishlistIds = getWishlistItems();
+
+        if (wishlistIds.length === 0) {
+          console.log('[Saved Items] No wishlist items, skipping fetch');
+          setDbProducts([]);
+          setDbProductsLoaded(true);
+          return;
+        }
+
+        console.log('[Saved Items] Fetching wishlist products:', wishlistIds);
+
+        // Batch fetch only the products in the wishlist (PERFORMANCE OPTIMIZATION)
+        const idsQuery = wishlistIds.join(',');
+        const response = await fetch(`/api/products?ids=${encodeURIComponent(idsQuery)}&fields=card`);
+
         console.log('[Saved Items] Response status:', response.status, response.statusText);
 
         if (response.ok) {
@@ -42,7 +56,7 @@ export default function SavedItemsPage() {
           console.log('[Saved Items] API Response:', data);
 
           if (data.success && data.products) {
-            console.log(`[Saved Items] ✅ Loaded ${data.products.length} products from database`);
+            console.log(`[Saved Items] ✅ Loaded ${data.products.length} wishlist products from database`);
             setDbProducts(data.products);
           } else {
             console.warn('[Saved Items] ⚠️ API returned success:false or no products array');
@@ -52,14 +66,14 @@ export default function SavedItemsPage() {
           console.error('[Saved Items] ❌ API request failed:', response.status, errorText);
         }
       } catch (error) {
-        console.error('[Saved Items] ❌ Failed to load database products:', error);
+        console.error('[Saved Items] ❌ Failed to load wishlist products:', error);
       } finally {
         setDbProductsLoaded(true);
       }
     };
 
-    fetchDatabaseProducts();
-  }, []);
+    fetchWishlistProducts();
+  }, []); // Only run once on mount
 
   const loadWishlistProducts = useCallback(() => {
     // Don't load wishlist until database products have been fetched
@@ -89,6 +103,15 @@ export default function SavedItemsPage() {
     );
 
     console.log('[Saved Items] Found', savedProducts.length, 'saved products');
+
+    // Check for missing products
+    const foundIds = savedProducts.map(p => p.id);
+    const missingIds = wishlistIds.filter(id => !foundIds.includes(id));
+
+    if (missingIds.length > 0) {
+      console.warn('[Saved Items] ⚠️ Products not found:', missingIds);
+      console.warn('[Saved Items] These products may have been deleted or are not yet loaded');
+    }
 
     setWishlistItems(savedProducts);
     setLoading(false);
@@ -164,7 +187,7 @@ export default function SavedItemsPage() {
         <div className="max-w-7xl mx-auto px-sm py-lg">
           {/* Page Header */}
           <div className="mb-xl">
-            <h1 className="text-h1 text-text-primary font-bold mb-sm">Saved Items</h1>
+            <h1 className="text-3xl md:text-5xl lg:text-6xl text-text-primary font-bold mb-sm">Saved Items</h1>
             <div className="h-6 w-48 bg-gray-200 rounded animate-pulse" />
           </div>
 
@@ -285,7 +308,7 @@ export default function SavedItemsPage() {
                 d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
               />
             </svg>
-            <h2 className="text-h2 text-text-primary font-medium mb-sm">Your wishlist is empty</h2>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl text-text-primary font-medium mb-sm">Your wishlist is empty</h2>
             <p className="text-body text-text-secondary mb-lg max-w-md mx-auto">
               Start saving products you're interested in by clicking the heart icon on any product card.
             </p>

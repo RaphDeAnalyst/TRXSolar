@@ -122,7 +122,7 @@ export default function GeneralInquiryForm() {
     <div className="w-full max-w-3xl mx-auto">
 
       <form onSubmit={handleSubmit} className="bg-surface border border-border rounded-lg p-lg md:p-xl shadow-md">
-        <div className="space-y-lg">
+        <div className="space-y-6">
           {/* Full Name */}
           <div>
             <label className="block text-body text-text-primary font-medium mb-sm">
