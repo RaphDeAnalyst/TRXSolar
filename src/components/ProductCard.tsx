@@ -54,8 +54,8 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <article className="group relative border border-gray-100 rounded-2xl bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out cursor-pointer h-full flex flex-col overflow-hidden">
-      {/* Image Container - 4:5 aspect ratio */}
-      <div className="relative w-full aspect-[4/5] bg-gray-50 overflow-hidden">
+      {/* Image Container - Fixed aspect ratio for uniform height */}
+      <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
         <Link href={`/products/${product.id}`}>
           <Image
             src={optimizedImageUrl}
@@ -102,12 +102,17 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.brand}
         </p>
 
-        {/* Product Name - With fixed height for consistency */}
-        <Link href={`/products/${product.id}`}>
-          <h3 className="text-sm md:text-base font-bold text-gray-800 line-clamp-2 min-h-[3rem] leading-snug hover:text-primary transition-colors">
-            {product.name}
-          </h3>
-        </Link>
+        {/* Product Name - Fixed height container reserves space for exactly 2 lines */}
+        <div className="h-[2.5rem] md:h-[3rem]">
+          <Link href={`/products/${product.id}`}>
+            <h3
+              className="text-sm md:text-base font-bold text-gray-800 line-clamp-2 leading-tight hover:text-primary transition-colors"
+              title={product.name}
+            >
+              {product.name}
+            </h3>
+          </Link>
+        </div>
 
         {/* Specifications - Sleek pills with light blue/gray background */}
         <div className="flex flex-wrap gap-2 text-xs text-gray-700">
