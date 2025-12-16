@@ -120,31 +120,32 @@ export default async function Home() {
       <div className="w-full">
         {/* Categories Section */}
         <section className="py-lg px-sm">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl text-text-primary mb-lg font-medium">Shop by Category</h2>
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl text-text-primary mb-lg font-medium text-center">Shop by Category</h2>
 
-          <div className="flex flex-wrap justify-center gap-md">
+          {/* Mobile-First Grid: 2 columns on mobile, 4 columns on desktop */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Link
               href="/products?category=solar-panels"
-              className="bg-primary text-surface px-lg py-md min-h-touch font-medium hover:bg-primary-dark transition-colors"
+              className="w-full bg-primary text-surface py-4 px-2 min-h-touch font-display font-semibold text-sm md:text-base hover:bg-primary-dark active:scale-95 transition-all duration-200 flex items-center justify-center text-center"
             >
               Solar Panels
             </Link>
             <Link
               href="/products?category=inverters"
-              className="bg-primary text-surface px-lg py-md min-h-touch font-medium hover:bg-primary-dark transition-colors"
+              className="w-full bg-primary text-surface py-4 px-2 min-h-touch font-display font-semibold text-sm md:text-base hover:bg-primary-dark active:scale-95 transition-all duration-200 flex items-center justify-center text-center"
             >
               Inverters
             </Link>
             <Link
               href="/products?category=batteries"
-              className="bg-primary text-surface px-lg py-md min-h-touch font-medium hover:bg-primary-dark transition-colors"
+              className="w-full bg-primary text-surface py-4 px-2 min-h-touch font-display font-semibold text-sm md:text-base hover:bg-primary-dark active:scale-95 transition-all duration-200 flex items-center justify-center text-center"
             >
               Batteries
             </Link>
             <Link
               href="/products?category=accessories"
-              className="bg-primary text-surface px-lg py-md min-h-touch font-medium hover:bg-primary-dark transition-colors"
+              className="w-full bg-primary text-surface py-4 px-2 min-h-touch font-display font-semibold text-sm md:text-base hover:bg-primary-dark active:scale-95 transition-all duration-200 flex items-center justify-center text-center"
             >
               Charge Controllers
             </Link>
