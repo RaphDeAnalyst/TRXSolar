@@ -9,9 +9,23 @@ export async function GET() {
 User-agent: *
 Allow: /
 
-# Disallow admin and API routes
+# Explicitly allow API routes for search engines to verify data sources
+Allow: /api/products
+Allow: /api/products?fields=card
+
+# Allow Next.js static assets
+Allow: /_next/static/
+
+# Disallow admin routes for security
 Disallow: /admin
-Disallow: /api/
+Disallow: /api/admin/
+
+# Disallow other API routes (allow only products API)
+Disallow: /api/contact
+Disallow: /api/quote
+Disallow: /api/test-db
+Disallow: /api/test-products
+Disallow: /api/init-db
 
 # Disallow saved items (user-specific)
 Disallow: /saved-items

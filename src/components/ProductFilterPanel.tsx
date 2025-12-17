@@ -1,8 +1,20 @@
 'use client';
 
 import { useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { Product, ProductCategory } from '@/lib/types';
-import PriceRangeSlider from '@/components/PriceRangeSlider';
+
+const PriceRangeSlider = dynamic(
+  () => import('@/components/PriceRangeSlider'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-24 flex items-center justify-center">
+        <div className="animate-pulse bg-border rounded-lg h-16 w-full" />
+      </div>
+    ),
+  }
+);
 
 interface ProductFilterPanelProps {
   // Filter state
