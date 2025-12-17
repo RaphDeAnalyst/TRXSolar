@@ -16,19 +16,6 @@ export default function SavedItemsPage() {
   const [dbProducts, setDbProducts] = useState<Product[]>([]);
   const [dbProductsLoaded, setDbProductsLoaded] = useState(false);
 
-  useEffect(() => {
-    // Listen for wishlist updates
-    const handleWishlistUpdate = () => {
-      loadWishlistProducts();
-    };
-
-    window.addEventListener('wishlistUpdated', handleWishlistUpdate);
-
-    return () => {
-      window.removeEventListener('wishlistUpdated', handleWishlistUpdate);
-    };
-  }, []);
-
   // Fetch ONLY wishlist products from database (optimized batch fetch)
   useEffect(() => {
     const fetchWishlistProducts = async () => {
@@ -120,6 +107,19 @@ export default function SavedItemsPage() {
   // Reload wishlist when database products are loaded
   useEffect(() => {
     loadWishlistProducts();
+  }, [loadWishlistProducts]);
+
+  // Listen for wishlist updates
+  useEffect(() => {
+    const handleWishlistUpdate = () => {
+      loadWishlistProducts();
+    };
+
+    window.addEventListener('wishlistUpdated', handleWishlistUpdate);
+
+    return () => {
+      window.removeEventListener('wishlistUpdated', handleWishlistUpdate);
+    };
   }, [loadWishlistProducts]);
 
   const handleClearAll = () => {
@@ -300,8 +300,9 @@ export default function SavedItemsPage() {
         onClose={() => setShowClearConfirm(false)}
         onConfirm={handleConfirmClear}
         title="Clear All Saved Items?"
-        message="Are you sure you want to remove all saved items? This action cannot be undone."
+        message="Clear all saved items? This cannot be undone."
         confirmText="Clear All"
+        cancelText="Cancel"
         confirmVariant="danger"
       />
     </div>

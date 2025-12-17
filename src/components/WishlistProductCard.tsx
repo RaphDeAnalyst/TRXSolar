@@ -1,20 +1,29 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Product } from '@/lib/types';
 import { toggleWishlistItem } from '@/lib/wishlist';
 import { transformCloudinaryUrl } from '@/lib/cloudinary-client';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 interface WishlistProductCardProps {
   product: Product;
 }
 
 export default function WishlistProductCard({ product }: WishlistProductCardProps) {
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+
   const handleRemoveItem = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setShowRemoveConfirm(true);
+  };
+
+  const handleConfirmRemove = () => {
     toggleWishlistItem(product.id);
+    setShowRemoveConfirm(false);
   };
 
   // Optimize image URL with Cloudinary transformations
@@ -95,6 +104,18 @@ export default function WishlistProductCard({ product }: WishlistProductCardProp
           </Link>
         </div>
       </div>
+
+      {/* Remove Item Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showRemoveConfirm}
+        onClose={() => setShowRemoveConfirm(false)}
+        onConfirm={handleConfirmRemove}
+        title="Remove Item?"
+        message="Remove this item from your wishlist?"
+        confirmText="Remove"
+        cancelText="Cancel"
+        confirmVariant="danger"
+      />
     </article>
   );
 }

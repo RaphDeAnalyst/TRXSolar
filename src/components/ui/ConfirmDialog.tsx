@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -25,8 +27,35 @@ export default function ConfirmDialog({
   confirmVariant = 'danger',
   isLoading = false,
 }: ConfirmDialogProps) {
+  const isMobile = useIsMobile();
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Mount check for SSR safety
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Freeze the isMobile state when dialog opens to prevent flickering
+  const isMobileSnapshot = useRef(isMobile);
+
+  // Update snapshot only when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      isMobileSnapshot.current = isMobile;
+    }
+  }, [isOpen, isMobile]);
+
+  // Use the frozen snapshot instead of live isMobile value
+  const frozenIsMobile = isOpen ? isMobileSnapshot.current : isMobile;
+
+  // Adaptive button text for mobile
+  const mobileCancelText = 'No';
+  const mobileConfirmText = 'Yes';
+
+  const displayCancelText = frozenIsMobile ? mobileCancelText : cancelText;
+  const displayConfirmText = frozenIsMobile ? mobileConfirmText : confirmText;
 
   // Handle ESC key press
   useEffect(() => {
@@ -117,51 +146,75 @@ export default function ConfirmDialog({
     }
   };
 
+  // Button classes following design system (48px minimum touch target, font-display)
   const confirmButtonClass =
     confirmVariant === 'danger'
-      ? 'px-lg py-sm min-h-touch bg-error text-white hover:bg-error/90 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-      : 'px-lg py-sm min-h-touch bg-primary text-white hover:bg-primary-dark rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
+      ? 'flex-1 sm:flex-initial px-6 py-3 min-h-[48px] bg-error text-surface font-display font-semibold hover:bg-error/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm'
+      : 'flex-1 sm:flex-initial px-6 py-3 min-h-[48px] bg-primary text-surface font-display font-semibold hover:bg-primary-dark rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm';
 
-  return (
+  // Don't render on server or when closed
+  if (!mounted || !isOpen) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-md animate-backdrop-fade"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-backdrop-fade isolate"
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
       aria-labelledby="dialog-title"
-      aria-describedby="dialog-description"
+      aria-describedby={frozenIsMobile ? undefined : "dialog-description"}
     >
       <div
         ref={dialogRef}
-        className="bg-surface border border-border rounded-lg shadow-2xl max-w-md w-full p-lg animate-modal-enter"
+        className="bg-surface border border-border rounded-xl shadow-2xl max-w-md w-full mx-4 p-6 md:p-8 animate-modal-enter relative z-10"
         role="alertdialog"
       >
+        {/* Title - H3 scale per design system: text-xl on mobile, text-2xl on desktop */}
         <h3
           id="dialog-title"
-          className="text-h2 font-display font-semibold text-text-primary mb-md"
+          className={`font-display font-semibold text-text-primary tracking-normal ${
+            frozenIsMobile
+              ? 'text-xl mb-6'
+              : 'text-xl md:text-2xl mb-3'
+          }`}
         >
           {title}
         </h3>
-        <p id="dialog-description" className="text-body text-text-secondary mb-lg leading-relaxed">
-          {message}
-        </p>
-        <div className="flex gap-sm justify-end">
+
+        {/* Message - Body text per design system: text-base, font-sans, leading-normal */}
+        {!frozenIsMobile && (
+          <p
+            id="dialog-description"
+            className="text-base font-sans text-text-secondary mb-6 leading-normal"
+          >
+            {message}
+          </p>
+        )}
+
+        {/* Button container - stacks vertically on mobile, horizontal on desktop */}
+        <div className={`flex gap-3 ${frozenIsMobile ? 'flex-col' : 'flex-col sm:flex-row sm:justify-end'}`}>
+          {/* Cancel/No button - 48px touch target, font-display, semibold */}
           <button
+            type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="px-lg py-sm min-h-touch text-text-secondary hover:text-text-primary hover:bg-background rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 sm:flex-initial px-6 py-3 min-h-[48px] bg-surface border-2 border-primary text-primary font-display font-semibold hover:bg-primary/5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {cancelText}
+            {displayCancelText}
           </button>
+
+          {/* Confirm/Yes button - 48px touch target, font-display, semibold */}
           <button
+            type="button"
             onClick={onConfirm}
             disabled={isLoading}
             className={confirmButtonClass}
           >
-            {isLoading ? 'Processing...' : confirmText}
+            {isLoading ? 'Processing...' : displayConfirmText}
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
