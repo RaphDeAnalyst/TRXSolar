@@ -53,8 +53,8 @@ export default function Header() {
         </Link>
 
         {/* Navigation */}
-        <div className="hidden md:flex gap-xl items-center">
-          <Link href="/" className={`text-lg ${isActive('/')}`}>
+        <div className="hidden lg:flex gap-md items-center">
+          <Link href="/" className={`text-base lg:text-lg ${isActive('/')}`}>
             Home
           </Link>
 
@@ -66,7 +66,7 @@ export default function Header() {
           >
             <Link
               href="/products"
-              className={`text-lg flex items-center gap-xs ${isActive('/products')}`}
+              className={`text-base lg:text-lg flex items-center gap-xs ${isActive('/products')}`}
             >
               Products
               <svg
@@ -108,10 +108,10 @@ export default function Header() {
             )}
           </div>
 
-          <Link href="/about" className={`text-lg ${isActive('/about')}`}>
+          <Link href="/about" className={`text-base lg:text-lg ${isActive('/about')}`}>
             About
           </Link>
-          <Link href="/contact" className={`text-lg ${isActive('/contact')}`}>
+          <Link href="/contact" className={`text-base lg:text-lg ${isActive('/contact')}`}>
             Contact
           </Link>
 
@@ -121,14 +121,14 @@ export default function Header() {
           {/* Get Quote CTA Button */}
           <Link
             href="/quote"
-            className="px-lg py-sm bg-primary text-white font-display font-semibold hover:bg-primary-dark transition-colors rounded shadow-md"
+            className="px-md lg:px-lg py-xs lg:py-sm bg-primary text-white font-display font-semibold hover:bg-primary-dark transition-colors rounded shadow-md text-sm lg:text-base whitespace-nowrap"
           >
-            Get Your Free Quote
+            Get Free Quote
           </Link>
         </div>
 
         {/* Mobile: Wishlist, Quote Icon and Hamburger Menu */}
-        <div className="md:hidden flex items-center gap-sm">
+        <div className="lg:hidden flex items-center gap-sm">
           {/* Wishlist Icon */}
           <WishlistIcon />
 
@@ -164,7 +164,7 @@ export default function Header() {
 
       {/* Mobile Slide-out Menu - Full screen overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-gray-900">
+        <div className="lg:hidden fixed inset-0 z-50 bg-gray-900">
           {/* Header with close button */}
           <div className="flex items-center justify-between px-md py-md border-b border-gray-700">
             <Link
