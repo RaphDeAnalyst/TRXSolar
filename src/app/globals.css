@@ -161,3 +161,22 @@ select {
 .animate-slideInLeft {
   animation: slideInLeft 0.3s ease-out;
 }
+
+/* Pop-in Animation for WhatsApp Button */
+@keyframes fade-in-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in-pop {
+  animation: fade-in-pop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}

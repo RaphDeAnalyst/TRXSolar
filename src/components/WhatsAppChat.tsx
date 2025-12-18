@@ -43,14 +43,14 @@ export default function WhatsAppChat() {
       href="https://wa.me/2348108698673"
       target="_blank"
       rel="noopener noreferrer"
-      className={`fixed bottom-6 right-6 z-50 w-16 h-16 flex items-center justify-center bg-[#25D366] text-white hover:bg-[#20BA5A] transition-all hover:scale-110 shadow-xl rounded-full ${
-        isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      className={`fixed bottom-4 right-4 md:bottom-6 md:right-6 z-40 w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-[#25D366] text-white hover:bg-[#20BA5A] transition-all duration-300 hover:scale-110 shadow-xl rounded-full ${
+        isVisible ? 'opacity-100 scale-100 animate-fade-in-pop' : 'opacity-0 scale-75 pointer-events-none'
       }`}
       aria-label="Chat on WhatsApp"
       title="Chat on WhatsApp"
     >
       <svg
-        className="w-9 h-9"
+        className="w-7 h-7 md:w-9 md:h-9"
         fill="currentColor"
         viewBox="0 0 24 24"
         xmlns="http://www.w3.org/2000/svg"
