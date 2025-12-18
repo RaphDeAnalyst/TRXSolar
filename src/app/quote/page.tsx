@@ -262,16 +262,16 @@ export default function QuotePage() {
             </div>
 
             {/* Submit Button */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-md pt-lg border-t border-border">
+            <div className="flex flex-col-reverse md:flex-row items-stretch md:items-center justify-between gap-3 pt-lg border-t border-border">
               <Link
                 href="/"
-                className="px-lg py-sm text-body text-text-secondary hover:text-text-primary transition-colors"
+                className="text-center md:text-left px-lg py-sm text-body text-text-secondary hover:text-text-primary transition-colors min-h-touch flex items-center justify-center md:justify-start"
               >
                 Cancel
               </Link>
               <button
                 type="submit"
-                className="w-full md:w-auto max-w-md px-xl py-md min-h-touch bg-primary text-surface font-medium hover:bg-primary-dark transition-colors rounded shadow-md"
+                className="w-full md:w-auto md:max-w-md px-xl py-md min-h-touch bg-primary text-surface font-medium hover:bg-primary-dark transition-colors rounded shadow-md"
               >
                 Get My Free Quote
               </button>
@@ -354,7 +354,7 @@ export default function QuotePage() {
                     <p className="font-medium">{submitError}</p>
                   </div>
                 )}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-md max-w-2xl mx-auto">
+                <div className="flex flex-col-reverse md:flex-row items-stretch md:items-center justify-between gap-3 max-w-2xl mx-auto">
                   <button
                     type="button"
                     onClick={() => setShowSummary(false)}
@@ -367,7 +367,7 @@ export default function QuotePage() {
                     type="button"
                     onClick={handleConfirmSubmit}
                     disabled={isSubmitting}
-                    className="w-full md:w-auto max-w-md px-xl py-md min-h-touch bg-primary text-surface font-medium hover:bg-primary-dark transition-colors rounded shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full md:w-auto md:max-w-md px-xl py-md min-h-touch bg-primary text-surface font-medium hover:bg-primary-dark transition-colors rounded shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? 'Submitting...' : 'Confirm & Submit Quote Request'}
                   </button>
