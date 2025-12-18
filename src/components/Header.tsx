@@ -2,21 +2,32 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import WishlistIcon from './WishlistIcon';
-
-const CATEGORIES = [
-  { value: 'solar-panels', label: 'Solar Panels' },
-  { value: 'inverters', label: 'Inverters' },
-  { value: 'batteries', label: 'Solar Batteries' },
-  { value: 'accessories', label: 'Charge Controllers' },
-];
+import { Category } from '@/lib/types';
 
 export default function Header() {
   const pathname = usePathname();
   const [showProductsDropdown, setShowProductsDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileProductsExpanded, setMobileProductsExpanded] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  // Load categories from API
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        if (data.success) {
+          setCategories(data.categories);
+        }
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    };
+    loadCategories();
+  }, []);
 
   const isActive = (path: string) => {
     return pathname === path
@@ -70,13 +81,16 @@ export default function Header() {
                     >
                       All Products
                     </Link>
-                    {CATEGORIES.map((category) => (
+                    {categories.map((category) => (
                       <Link
-                        key={category.value}
-                        href={`/products?category=${category.value}`}
-                        className="block px-md py-sm text-base text-text-primary hover:bg-background hover:text-primary transition-colors"
+                        key={category.slug}
+                        href={`/products?category=${category.slug}`}
+                        className="flex items-center gap-2 px-md py-sm text-base text-text-primary hover:bg-background hover:text-primary transition-colors"
                       >
-                        {category.label}
+                        {category.icon_url && (
+                          <img src={category.icon_url} alt="" className="w-4 h-4 object-contain" />
+                        )}
+                        {category.name}
                       </Link>
                     ))}
                   </div>
@@ -215,14 +229,17 @@ export default function Header() {
                   >
                     All Products
                   </Link>
-                  {CATEGORIES.map((category) => (
+                  {categories.map((category) => (
                     <Link
-                      key={category.value}
-                      href={`/products?category=${category.value}`}
+                      key={category.slug}
+                      href={`/products?category=${category.slug}`}
                       onClick={() => setMobileMenuOpen(false)}
-                      className="block text-base font-sans py-sm px-md rounded text-gray-400 hover:text-primary-light hover:bg-gray-800 transition-colors"
+                      className="flex items-center gap-2 text-base font-sans py-sm px-md rounded text-gray-400 hover:text-primary-light hover:bg-gray-800 transition-colors"
                     >
-                      {category.label}
+                      {category.icon_url && (
+                        <img src={category.icon_url} alt="" className="w-4 h-4 object-contain" />
+                      )}
+                      {category.name}
                     </Link>
                   ))}
                 </div>

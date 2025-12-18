@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Product } from '@/lib/types';
+import { Product, Category } from '@/lib/types';
 import { Contact } from '@/types';
 import productsData from '@/data/products.json';
 import AdminProductTable from '@/components/admin/AdminProductTable';
 import AdminProductForm from '@/components/admin/AdminProductForm';
 import AdminContactTable from '@/components/admin/AdminContactTable';
+import CategoryManagementTab from '@/components/admin/CategoryManagementTab';
 import { generateSKU } from '@/lib/admin/skuGenerator';
 import { useToast } from '@/components/contexts/ToastContext';
 
@@ -33,9 +34,10 @@ export default function AdminPage() {
   // Contact management state
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isLoadingContacts, setIsLoadingContacts] = useState(false);
-  const [activeTab, setActiveTab] = useState<'products' | 'contacts'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'contacts'>('products');
   const [contactSearch, setContactSearch] = useState('');
   const [contactStatusFilter, setContactStatusFilter] = useState('all');
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'solar2024';
 
@@ -71,13 +73,27 @@ export default function AdminPage() {
     checkExistingSession();
   }, []);
 
-  // Load products on mount
+  // Load products and categories on mount
   useEffect(() => {
     if (isAuthenticated) {
       loadProducts();
       loadContacts();
+      loadCategories();
     }
   }, [isAuthenticated]);
+
+  // Load categories from API
+  const loadCategories = async () => {
+    try {
+      const response = await fetch('/api/categories');
+      const data = await response.json();
+      if (data.success) {
+        setCategories(data.categories);
+      }
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
 
   // Load products from database and merge with JSON
   const loadProducts = async () => {
@@ -385,7 +401,7 @@ export default function AdminPage() {
     } else {
       // Create new product with auto-generated SKU
       try {
-        const sku = generateSKU(productData, products);
+        const sku = generateSKU(productData, products, categories);
 
         const response = await fetch('/api/admin/products', {
           method: 'POST',
@@ -657,7 +673,7 @@ export default function AdminPage() {
             <button
               type="button"
               onClick={() => setActiveTab('products')}
-              className={`flex-1 py-md px-lg rounded transition-colors ${
+              className={`flex-1 py-md px-lg rounded transition-colors font-display font-semibold ${
                 activeTab === 'products'
                   ? 'bg-primary text-white'
                   : 'bg-background text-text-secondary hover:text-text-primary'
@@ -667,8 +683,19 @@ export default function AdminPage() {
             </button>
             <button
               type="button"
+              onClick={() => setActiveTab('categories')}
+              className={`flex-1 py-md px-lg rounded transition-colors font-display font-semibold ${
+                activeTab === 'categories'
+                  ? 'bg-primary text-white'
+                  : 'bg-background text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              Categories
+            </button>
+            <button
+              type="button"
               onClick={() => setActiveTab('contacts')}
-              className={`flex-1 py-md px-lg rounded transition-colors ${
+              className={`flex-1 py-md px-lg rounded transition-colors font-display font-semibold ${
                 activeTab === 'contacts'
                   ? 'bg-primary text-white'
                   : 'bg-background text-text-secondary hover:text-text-primary'
@@ -712,10 +739,11 @@ export default function AdminPage() {
                     className="w-full md:w-auto px-md py-sm border border-border bg-background focus:border-primary focus:outline-none rounded"
                   >
                     <option value="all">All Categories</option>
-                    <option value="solar-panels">Solar Panels</option>
-                    <option value="inverters">Inverters</option>
-                    <option value="batteries">Batteries</option>
-                    <option value="accessories">Accessories</option>
+                    {categories.map((cat) => (
+                      <option key={cat.slug} value={cat.slug}>
+                        {cat.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -783,6 +811,8 @@ export default function AdminPage() {
         )}
 
           </>
+        ) : activeTab === 'categories' ? (
+          <CategoryManagementTab adminPassword={ADMIN_PASSWORD} />
         ) : (
           <>
             {/* Contact Management - Search and Filter Bar */}

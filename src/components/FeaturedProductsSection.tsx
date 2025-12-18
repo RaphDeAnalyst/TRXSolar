@@ -18,7 +18,7 @@ export default function FeaturedProductsSection({ products, isLoading }: Feature
           <h2 className="text-h2 text-text-primary mb-lg font-medium">Featured Products</h2>
 
           <div
-            className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8"
+            className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8"
             role="status"
             aria-live="polite"
             aria-label="Loading featured products"
@@ -44,7 +44,7 @@ export default function FeaturedProductsSection({ products, isLoading }: Feature
       <div className="max-w-screen-2xl mx-auto">
         <h2 className="text-h2 text-text-primary mb-lg font-medium">Featured Products</h2>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

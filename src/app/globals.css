@@ -142,3 +142,19 @@ select {
 .animate-fade-in {
   animation: fade-in 0.2s ease-out;
 }
+
+/* Slide-in Animation for Sidebar */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.3s ease-out;
+}

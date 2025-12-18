@@ -6,19 +6,12 @@ import ProductGrid from '@/components/ProductGrid';
 import Pagination from '@/components/Pagination';
 import ProductFilterPanel from '@/components/ProductFilterPanel';
 import productsData from '@/data/products.json';
-import { Product, ProductCategory } from '@/lib/types';
+import { Product, ProductCategory, Category } from '@/lib/types';
 
 interface ProductsPageClientProps {
   initialProducts: Product[];
   initialCategory: ProductCategory | null;
 }
-
-const CATEGORIES: { value: ProductCategory; label: string }[] = [
-  { value: 'solar-panels', label: 'Solar Panels' },
-  { value: 'inverters', label: 'Inverters' },
-  { value: 'batteries', label: 'Batteries' },
-  { value: 'accessories', label: 'Accessories' },
-];
 
 export default function ProductsPageClient({
   initialProducts,
@@ -29,6 +22,44 @@ export default function ProductsPageClient({
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000]);
   const [brands, setBrands] = useState<Set<string>>(new Set());
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  // Desktop filter collapse state with localStorage persistence
+  const [isDesktopFilterOpen, setIsDesktopFilterOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('desktop-filter-open');
+      return saved !== null ? saved === 'true' : true; // Default to open
+    }
+    return true;
+  });
+
+  // Load categories from API
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        if (data.success) {
+          setCategories(data.categories);
+        }
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    };
+    loadCategories();
+  }, []);
+
+  // Persist desktop filter state to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('desktop-filter-open', isDesktopFilterOpen.toString());
+    }
+  }, [isDesktopFilterOpen]);
+
+  // Toggle desktop filter
+  const toggleDesktopFilter = () => {
+    setIsDesktopFilterOpen((prev) => !prev);
+  };
 
   // KEY CHANGE: Use server data directly (no need for state since data doesn't change)
   const dbProducts = initialProducts;
@@ -171,24 +202,79 @@ export default function ProductsPageClient({
           <span>Refine Search</span>
         </button>
 
-        {/* Adaptive Filter Panel Component */}
-        <div className="flex flex-col lg:flex-row gap-8">
-          <ProductFilterPanel
-            category={category}
-            priceRange={priceRange}
-            brands={brands}
-            onCategoryChange={setCategory}
-            onPriceRangeChange={setPriceRange}
-            onBrandsChange={setBrands}
-            allProducts={allProducts}
-            uniqueBrands={uniqueBrands}
-            isOpen={mobileFilterOpen}
-            onClose={() => setMobileFilterOpen(false)}
-            filteredCount={filteredProducts.length}
-          />
+        {/* Floating Vertical Tab - Shows when filters are closed (Desktop only) */}
+        {!isDesktopFilterOpen && (
+          <button
+            type="button"
+            onClick={toggleDesktopFilter}
+            className="hidden lg:flex fixed left-0 top-1/2 -translate-y-1/2 z-20 flex-col items-center justify-center gap-2 bg-primary text-white hover:bg-primary-dark transition-all duration-300 py-6 px-3 rounded-r-lg shadow-xl"
+            aria-label="Show filters"
+            title="Show filters"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            <span className="text-[10px] font-bold uppercase tracking-widest [writing-mode:vertical-rl] rotate-180">
+              Filters
+            </span>
+          </button>
+        )}
 
-          {/* Products Section */}
-          <div className="flex-1 min-w-0">
+        {/* Adaptive Filter Panel Component - Fluid Layout */}
+        <div className="flex flex-col lg:flex-row gap-8 transition-all duration-300">
+          {/* Desktop Sidebar - Only takes space when open */}
+          {isDesktopFilterOpen && (
+            <div className="hidden lg:block w-64 flex-shrink-0 animate-slideInLeft">
+              {/* Close Button inside sidebar */}
+              <button
+                type="button"
+                onClick={toggleDesktopFilter}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white hover:bg-primary-dark transition-all duration-300 rounded-lg shadow-sm font-sans font-semibold text-sm mb-6"
+                aria-label="Hide filters"
+                aria-expanded={true}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span>Hide Filters</span>
+              </button>
+
+              {/* Filter Panel Content */}
+              <ProductFilterPanel
+                category={category}
+                priceRange={priceRange}
+                brands={brands}
+                onCategoryChange={setCategory}
+                onPriceRangeChange={setPriceRange}
+                onBrandsChange={setBrands}
+                allProducts={allProducts}
+                uniqueBrands={uniqueBrands}
+                isOpen={mobileFilterOpen}
+                onClose={() => setMobileFilterOpen(false)}
+                filteredCount={filteredProducts.length}
+              />
+            </div>
+          )}
+
+          {/* Mobile Filter Panel - Only shows on mobile */}
+          <div className="lg:hidden">
+            <ProductFilterPanel
+              category={category}
+              priceRange={priceRange}
+              brands={brands}
+              onCategoryChange={setCategory}
+              onPriceRangeChange={setPriceRange}
+              onBrandsChange={setBrands}
+              allProducts={allProducts}
+              uniqueBrands={uniqueBrands}
+              isOpen={mobileFilterOpen}
+              onClose={() => setMobileFilterOpen(false)}
+              filteredCount={filteredProducts.length}
+            />
+          </div>
+
+          {/* Products Section - Fluid width that expands when filters close */}
+          <div className="flex-1 min-w-0 transition-all duration-300">
             {/* Filter Summary */}
             <div className="mb-6 flex flex-wrap gap-2 items-center justify-between">
               <div className="flex flex-wrap gap-2 items-center">
@@ -206,7 +292,7 @@ export default function ProductsPageClient({
                       onClick={() => setCategory(null)}
                       className="text-xs bg-background px-3 py-1.5 rounded-md flex items-center gap-2 hover:bg-border transition-colors min-h-[32px]"
                     >
-                      {CATEGORIES.find((c) => c.value === category)?.label}
+                      {categories.find((c) => c.slug === category)?.name || category}
                       <span aria-hidden="true">✕</span>
                     </button>
                   )}

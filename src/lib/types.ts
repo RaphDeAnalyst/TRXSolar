@@ -1,4 +1,17 @@
-export type ProductCategory = 'solar-panels' | 'inverters' | 'batteries' | 'accessories';
+// Category interface for dynamic category system
+export interface Category {
+  id: number;
+  slug: string;
+  name: string;
+  description: string | null;
+  icon_url: string | null;
+  category_code: string | null;
+  display_order: number;
+  product_count?: number;
+}
+
+// Updated to string to support dynamic categories
+export type ProductCategory = string;
 
 export interface ProductSpecs {
   [key: string]: string | number;

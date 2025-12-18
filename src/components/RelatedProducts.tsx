@@ -21,7 +21,7 @@ export default function RelatedProducts({ currentProduct, allProducts }: Related
       <h2 className="text-xl md:text-2xl text-text-primary font-display font-semibold mb-6 tracking-tight">
         Related Products
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
         {relatedProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}

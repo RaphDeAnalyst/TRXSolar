@@ -271,6 +271,7 @@ export default function FileUploader({
                       src={file.thumbnail_url || '/images/placeholder.jpg'}
                       alt="Video thumbnail"
                       fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 200px"
                       className="object-cover"
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/30">
@@ -288,6 +289,7 @@ export default function FileUploader({
                     src={file.url}
                     alt={`Upload ${index + 1}`}
                     fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 200px"
                     className="object-cover"
                   />
                 )}

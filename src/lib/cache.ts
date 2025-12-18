@@ -114,6 +114,57 @@ export async function revalidateAllProductCaches() {
 }
 
 /**
+ * Revalidates category-related caches after mutations
+ *
+ * @param slug - Optional specific category slug to revalidate
+ *
+ * @example
+ * // After creating a new category
+ * await revalidateCategoryCache('wind-turbines');
+ *
+ * // After reordering categories (no slug needed)
+ * await revalidateCategoryCache();
+ */
+export async function revalidateCategoryCache(slug?: string | null) {
+  try {
+    console.log('[Cache] Revalidating category caches...', { slug });
+
+    // Always revalidate the main categories cache
+    try {
+      // @ts-expect-error - Next.js 16 API change
+      revalidateTag('categories');
+      console.log('[Cache] ✅ Revalidated: categories');
+    } catch (e) {
+      console.warn('[Cache] ⚠️ Could not revalidate categories tag');
+    }
+
+    // Revalidate specific category if provided
+    if (slug) {
+      try {
+        // @ts-expect-error - Next.js 16 API change
+        revalidateTag(`category-${slug}`);
+        console.log(`[Cache] ✅ Revalidated: category-${slug}`);
+      } catch (e) {
+        console.warn(`[Cache] ⚠️ Could not revalidate category-${slug} tag`);
+      }
+    }
+
+    // Also revalidate products cache since category changes affect filters
+    try {
+      // @ts-expect-error - Next.js 16 API change
+      revalidateTag('products');
+      console.log('[Cache] ✅ Revalidated: products (category change)');
+    } catch (e) {
+      console.warn('[Cache] ⚠️ Could not revalidate products tag');
+    }
+
+    console.log('[Cache] ✅ Category cache revalidation complete');
+  } catch (error) {
+    console.error('[Cache] ❌ Error during category revalidation:', error);
+  }
+}
+
+/**
  * Get cache statistics (for debugging)
  *
  * Note: This is a placeholder for future implementation.

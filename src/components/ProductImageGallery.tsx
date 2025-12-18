@@ -124,6 +124,7 @@ export default function ProductImageGallery({ productName, images, media }: Prod
         src={optimizedUrl}
         alt={productName}
         fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
         className={className || 'object-contain'}
         priority={priority}
         loading={priority ? 'eager' : 'lazy'}
@@ -249,6 +250,7 @@ export default function ProductImageGallery({ productName, images, media }: Prod
                 })}
                 alt={`${productName} thumbnail ${idx + 1}`}
                 fill
+                sizes="64px"
                 className="object-cover rounded"
                 loading="lazy"
               />
@@ -356,6 +358,7 @@ export default function ProductImageGallery({ productName, images, media }: Prod
                 })}
                 alt={`${productName} thumbnail ${idx + 1}`}
                 fill
+                sizes="(max-width: 768px) 80px, 100px"
                 className="object-cover"
                 loading="lazy"
               />

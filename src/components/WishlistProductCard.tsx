@@ -68,7 +68,7 @@ export default function WishlistProductCard({ product }: WishlistProductCardProp
         </button>
       </div>
 
-      {/* Text Container - Minimal: Brand, Name, Price only */}
+      {/* Text Container - Shows technical specs for informed purchasing */}
       <div className="p-4 flex flex-col gap-3 flex-1">
         {/* Brand Name - Prominent, above title */}
         <p className="text-sm font-sans font-medium text-text-secondary uppercase tracking-wide">
@@ -86,6 +86,18 @@ export default function WishlistProductCard({ product }: WishlistProductCardProp
             </h3>
           </Link>
         </div>
+
+        {/* Technical Specs - Voltage and Wattage for wishlist context */}
+        {(product.specs.voltage || product.specs.Voltage || product.specs.wattage || product.specs.Wattage) && (
+          <div className="flex gap-3 text-xs text-text-secondary">
+            {(product.specs.voltage || product.specs.Voltage) && (
+              <span className="font-medium">{product.specs.voltage || product.specs.Voltage}</span>
+            )}
+            {(product.specs.wattage || product.specs.Wattage) && (
+              <span className="font-medium">{product.specs.wattage || product.specs.Wattage}</span>
+            )}
+          </div>
+        )}
 
         {/* Price and CTA Container - Bottom of card */}
         <div className="mt-auto pt-3 border-t border-border space-y-3">

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Product, ProductCategory, MediaFile } from '@/lib/types';
+import { Product, ProductCategory, MediaFile, Category } from '@/lib/types';
 import FileUploader from '@/components/FileUploader';
 
 interface AdminProductFormProps {
@@ -11,14 +11,8 @@ interface AdminProductFormProps {
   adminPassword: string;
 }
 
-const CATEGORIES: { value: ProductCategory; label: string }[] = [
-  { value: 'solar-panels', label: 'Solar Panels' },
-  { value: 'inverters', label: 'Inverters' },
-  { value: 'batteries', label: 'Solar Batteries' },
-  { value: 'accessories', label: 'Accessories' },
-];
-
 export default function AdminProductForm({ product, onSubmit, onCancel, adminPassword }: AdminProductFormProps) {
+  const [categories, setCategories] = useState<Category[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     brand: '',
@@ -73,6 +67,26 @@ export default function AdminProductForm({ product, onSubmit, onCancel, adminPas
       }
     }
   }, [product]);
+
+  // Load categories from API
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        if (data.success) {
+          setCategories(data.categories);
+          // Set default category to first one if not editing and no category set
+          if (!product && data.categories.length > 0 && !formData.category) {
+            setFormData(prev => ({ ...prev, category: data.categories[0].slug }));
+          }
+        }
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    };
+    loadCategories();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -219,11 +233,15 @@ export default function AdminProductForm({ product, onSubmit, onCancel, adminPas
                 onChange={handleChange}
                 className="w-full px-md py-sm border border-border bg-surface focus:border-primary focus:outline-none rounded"
               >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
+                {categories.length === 0 ? (
+                  <option value="">Loading categories...</option>
+                ) : (
+                  categories.map((cat) => (
+                    <option key={cat.slug} value={cat.slug}>
+                      {cat.name}
+                    </option>
+                  ))
+                )}
               </select>
             </div>
           </div>

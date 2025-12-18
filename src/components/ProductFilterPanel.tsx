@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { Product, ProductCategory } from '@/lib/types';
+import { Product, ProductCategory, Category } from '@/lib/types';
 
 const PriceRangeSlider = dynamic(
   () => import('@/components/PriceRangeSlider'),
@@ -39,13 +39,6 @@ interface ProductFilterPanelProps {
   filteredCount: number;
 }
 
-const CATEGORIES: { value: ProductCategory; label: string }[] = [
-  { value: 'solar-panels', label: 'Solar Panels' },
-  { value: 'inverters', label: 'Inverters' },
-  { value: 'batteries', label: 'Batteries' },
-  { value: 'accessories', label: 'Accessories' },
-];
-
 // Helper function to round up prices to user-friendly values
 function roundUpPrice(price: number): number {
   if (price === 0) return 10000;
@@ -68,6 +61,24 @@ export default function ProductFilterPanel({
   onClose,
   filteredCount,
 }: ProductFilterPanelProps) {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  // Load categories from API
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        if (data.success) {
+          setCategories(data.categories);
+        }
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    };
+    loadCategories();
+  }, []);
+
   // Calculate dynamic max price based on selected category
   const maxPrice = useMemo(() => {
     let productsToConsider = allProducts;
@@ -138,19 +149,22 @@ export default function ProductFilterPanel({
           </button>
 
           {/* Specific Categories */}
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <button
-              key={cat.value}
+              key={cat.slug}
               type="button"
-              onClick={() => handleCategoryChange(cat.value)}
-              className={`px-4 py-3 rounded-lg text-sm font-sans font-medium transition-all duration-200 text-center lg:text-left min-h-[48px] ${
-                category === cat.value
+              onClick={() => handleCategoryChange(cat.slug)}
+              className={`px-4 py-3 rounded-lg text-sm font-sans font-medium transition-all duration-200 text-center lg:text-left min-h-[48px] flex items-center gap-2 ${
+                category === cat.slug
                   ? 'bg-primary text-white shadow-sm'
                   : 'bg-background hover:bg-border text-text-primary'
               }`}
-              aria-pressed={category === cat.value}
+              aria-pressed={category === cat.slug}
             >
-              {cat.label}
+              {cat.icon_url && (
+                <img src={cat.icon_url} alt="" className="w-5 h-5 object-contain" />
+              )}
+              <span>{cat.name}</span>
             </button>
           ))}
         </div>
@@ -210,8 +224,8 @@ export default function ProductFilterPanel({
 
   return (
     <>
-      {/* Mobile Bottom Sheet Drawer */}
-      <div className="lg:hidden">
+      {/* Mobile Bottom Sheet Drawer - Only renders on mobile */}
+      <div className="block lg:hidden">
         {/* Backdrop */}
         <div
           className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-200 ${
@@ -280,15 +294,15 @@ export default function ProductFilterPanel({
         </div>
       </div>
 
-      {/* Desktop Fixed Sidebar */}
-      <aside className="hidden lg:block w-64 flex-shrink-0">
+      {/* Desktop Sidebar Content - Rendered inline within parent container */}
+      <div className="hidden lg:block">
         <div className="sticky top-24 bg-surface border border-border rounded-lg shadow-sm p-6">
           <h2 className="text-lg font-display font-semibold tracking-tight text-text-primary mb-6">
             Refine Your Search
           </h2>
           <FilterContent />
         </div>
-      </aside>
+      </div>
     </>
   );
 }

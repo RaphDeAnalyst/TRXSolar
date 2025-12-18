@@ -1,4 +1,4 @@
-import { Product, ProductCategory } from '../types';
+import { Product, ProductCategory, Category } from '../types';
 
 /**
  * Generate brand code from brand name
@@ -9,16 +9,43 @@ function generateBrandCode(brand: string): string {
 }
 
 /**
- * Generate category code from category
+ * Generate category code algorithmically from category slug
+ * Used as fallback when category doesn't have an explicit code
  */
-function generateCategoryCode(category: ProductCategory): string {
-  const categoryMap: Record<ProductCategory, string> = {
-    'solar-panels': 'SP',
-    'inverters': 'INV',
-    'batteries': 'BAT',
-    'accessories': 'ACC',
-  };
-  return categoryMap[category];
+function generateCategoryCodeFromSlug(slug: string): string {
+  // Remove hyphens and split into words
+  const words = slug.split('-').filter(w => w.length > 0);
+
+  if (words.length === 1) {
+    // Single word: take first 2-3 chars
+    return words[0].substring(0, 3).toUpperCase();
+  } else if (words.length === 2) {
+    // Two words: take first 2 chars of each
+    return (words[0].substring(0, 2) + words[1].substring(0, 2)).toUpperCase();
+  } else {
+    // Multiple words: take first char of first 3-4 words
+    return words.slice(0, Math.min(4, words.length)).map(w => w[0]).join('').toUpperCase();
+  }
+}
+
+/**
+ * Generate category code from category slug
+ * Looks up category_code from categories array, falls back to algorithmic generation
+ */
+function generateCategoryCode(
+  categorySlug: ProductCategory,
+  categories?: Category[]
+): string {
+  // Try to find category in provided array
+  if (categories && categories.length > 0) {
+    const category = categories.find(c => c.slug === categorySlug);
+    if (category && category.category_code) {
+      return category.category_code;
+    }
+  }
+
+  // Fallback to algorithmic generation from slug
+  return generateCategoryCodeFromSlug(categorySlug);
 }
 
 /**
@@ -74,17 +101,22 @@ function generateUniqueId(existingProducts: Product[], brand: string, category: 
  * Generate SKU for a product
  * Format: [Brand Code]-[Category Code]-[Wattage/Capacity]-[Unique ID]
  * Example: CAN-SP-550-001
+ *
+ * @param product - Product data including brand, category, and specs
+ * @param existingProducts - Array of existing products to ensure unique ID
+ * @param categories - Optional array of categories to lookup category codes
  */
 export function generateSKU(
   product: Partial<Product>,
-  existingProducts: Product[]
+  existingProducts: Product[],
+  categories?: Category[]
 ): string {
   if (!product.brand || !product.category) {
     throw new Error('Brand and category are required to generate SKU');
   }
 
   const brandCode = generateBrandCode(product.brand);
-  const categoryCode = generateCategoryCode(product.category);
+  const categoryCode = generateCategoryCode(product.category, categories);
   const capacity = product.specs ? extractCapacity(product.specs) : '000';
   const uniqueId = generateUniqueId(existingProducts, product.brand, product.category);
 

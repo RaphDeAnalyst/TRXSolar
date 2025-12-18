@@ -9,9 +9,10 @@ import { transformCloudinaryUrl } from '@/lib/cloudinary-client';
 
 interface ProductCardProps {
   product: Product;
+  showTechnicalSpecs?: boolean;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, showTechnicalSpecs = false }: ProductCardProps) {
   const [isInWishlist, setIsInWishlist] = useState(false);
 
   useEffect(() => {
@@ -36,13 +37,9 @@ export default function ProductCard({ product }: ProductCardProps) {
     toggleWishlistItem(product.id);
   };
 
-  // Extract key specs to display (limit to 2-3 most important)
-  const displaySpecs = Object.entries(product.specs)
-    .slice(0, 3)
-    .map(([key, value]) => ({
-      label: key.charAt(0).toUpperCase() + key.slice(1),
-      value: value.toString(),
-    }));
+  // Extract only voltage and wattage from specs
+  const voltage = product.specs.voltage || product.specs.Voltage;
+  const wattage = product.specs.wattage || product.specs.Wattage;
 
   // Optimize image URL with Cloudinary transformations
   const optimizedImageUrl = transformCloudinaryUrl(product.image, {
@@ -53,16 +50,16 @@ export default function ProductCard({ product }: ProductCardProps) {
   });
 
   return (
-    <article className="group relative border border-gray-100 rounded-2xl bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out cursor-pointer h-full flex flex-col overflow-hidden">
-      {/* Image Container - Fixed aspect ratio for uniform height */}
-      <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
-        <Link href={`/products/${product.id}`}>
+    <article className="group relative border border-border rounded-2xl bg-surface hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 ease-in-out cursor-pointer h-full flex flex-col overflow-hidden">
+      {/* Image Container - Fixed aspect ratio matching wishlist */}
+      <div className="relative w-full aspect-square bg-background overflow-hidden">
+        <Link href={`/products/${product.id}`} className="relative block w-full h-full">
           <Image
             src={optimizedImageUrl}
             alt={product.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 400px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            sizes="(max-width: 400px) 50vw, (max-width: 768px) 50vw, (max-width: 1024px) 25vw, 25vw"
             priority={product.featured}
             loading={product.featured ? 'eager' : 'lazy'}
           />
@@ -95,18 +92,18 @@ export default function ProductCard({ product }: ProductCardProps) {
         </button>
       </div>
 
-      {/* Text Container - Enhanced with specifications */}
+      {/* Text Container - Matching wishlist layout */}
       <div className="p-4 flex flex-col gap-3 flex-1">
-        {/* Brand Name - Prominent, above title */}
-        <p className="text-sm font-sans font-medium text-gray-500 uppercase tracking-wide">
+        {/* Brand Name */}
+        <p className="text-sm font-sans font-medium text-text-secondary uppercase tracking-wide">
           {product.brand}
         </p>
 
-        {/* Product Name - Fixed height container reserves space for exactly 2 lines */}
+        {/* Product Name - Fixed height container for consistency */}
         <div className="h-[2.5rem] md:h-[3rem]">
           <Link href={`/products/${product.id}`}>
             <h3
-              className="text-sm md:text-base font-bold text-gray-800 line-clamp-2 leading-tight hover:text-primary transition-colors"
+              className="text-sm md:text-base font-bold text-text-primary line-clamp-2 leading-tight hover:text-primary transition-colors"
               title={product.name}
             >
               {product.name}
@@ -114,26 +111,25 @@ export default function ProductCard({ product }: ProductCardProps) {
           </Link>
         </div>
 
-        {/* Specifications - Sleek pills with light blue/gray background */}
-        <div className="flex flex-wrap gap-2 text-xs text-gray-700">
-          {displaySpecs.map((spec, index) => (
-            <span key={index} className="bg-blue-50 text-blue-900 px-2.5 py-1 rounded-full border border-blue-100">
-              {spec.label}: <span className="font-semibold">{spec.value}</span>
-            </span>
-          ))}
-        </div>
+        {/* Voltage and Wattage - Only shown when showTechnicalSpecs is true */}
+        {showTechnicalSpecs && (voltage || wattage) && (
+          <div className="flex gap-3 text-xs text-text-secondary">
+            {voltage && <span className="font-medium">{voltage}</span>}
+            {wattage && <span className="font-medium">{wattage}</span>}
+          </div>
+        )}
 
         {/* Price and CTA Container - Bottom of card */}
-        <div className="mt-auto pt-3 border-t border-gray-100 space-y-3">
-          {/* Price - Teal/Turquoise color, large and bold */}
+        <div className="mt-auto pt-3 border-t border-border space-y-3">
+          {/* Price */}
           <p className="text-xl font-mono font-bold text-primary tabular-nums">
             ₦{product.price.toLocaleString('en-NG')}
           </p>
 
-          {/* View Details Button - Always visible on mobile, hover on desktop */}
+          {/* View Details Button */}
           <Link
             href={`/products/${product.id}`}
-            className="block w-full text-center px-4 py-3 min-h-touch bg-primary text-white text-sm font-sans font-semibold rounded-lg hover:bg-primary-dark transition-colors"
+            className="block w-full text-center px-4 py-3 min-h-[48px] bg-primary text-surface text-sm font-display font-semibold rounded-lg hover:bg-primary-dark transition-colors shadow-md"
             onClick={(e) => e.stopPropagation()}
           >
             View Details

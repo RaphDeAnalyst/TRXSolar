@@ -12,7 +12,7 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
   if (isLoading) {
     return (
       <div
-        className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8"
+        className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 transition-all duration-300"
         role="status"
         aria-live="polite"
         aria-label="Loading products"
@@ -34,9 +34,9 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
     );
   }
 
-  // Success State: Render actual product cards
+  // Success State: Render actual product cards with smooth transitions
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 transition-all duration-300">
       {products.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
