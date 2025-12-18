@@ -74,7 +74,7 @@ export default async function Home() {
                          hover:scale-[1.02] transition-transform duration-300
                          focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               style={{
-                backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200&q=80')`,
+                backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/category-solar-panel.jpg')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
@@ -96,7 +96,7 @@ export default async function Home() {
                          hover:scale-[1.02] transition-transform duration-300
                          focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               style={{
-                backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=1200&q=80')`,
+                backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/category-inverters.webp')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
@@ -118,7 +118,7 @@ export default async function Home() {
                          hover:scale-[1.02] transition-transform duration-300
                          focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               style={{
-                backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1624996752380-8ec242ebc179?w=800&q=80')`,
+                backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/category-batteries.webp')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
@@ -140,7 +140,7 @@ export default async function Home() {
                          hover:scale-[1.02] transition-transform duration-300
                          focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               style={{
-                backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80')`,
+                backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/category-charge-controllers.jpg')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
