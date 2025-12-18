@@ -73,22 +73,25 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* Focus states for accessibility */
+/* Focus states for accessibility - only show on keyboard navigation */
+/* Remove default focus outline on mouse click */
 a:focus,
 button:focus,
 input:focus,
 textarea:focus,
 select:focus {
-  outline: 2px solid #007A87;
-  outline-offset: 2px;
+  outline: none;
 }
 
-/* Remove default focus ring and add custom */
+/* Show custom focus ring only for keyboard navigation */
 a:focus-visible,
 button:focus-visible,
-input:focus-visible {
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
   outline: 2px solid #007A87;
   outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* Smooth transitions */

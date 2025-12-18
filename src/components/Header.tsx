@@ -32,8 +32,8 @@ export default function Header() {
 
   const isActive = (path: string) => {
     return pathname === path
-      ? 'text-primary-light font-medium outline-none focus:outline-none'
-      : 'text-gray-200 hover:text-primary-light outline-none focus:outline-none';
+      ? 'text-primary-light font-medium focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 focus-visible:rounded'
+      : 'text-gray-200 hover:text-primary-light focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 focus-visible:rounded';
   };
 
   return (
