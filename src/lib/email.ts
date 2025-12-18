@@ -17,6 +17,19 @@ export interface QuoteRequestData {
   timeframe: string;
   address: string;
   notes?: string;
+  conditionalFields?: {
+    residential?: {
+      roomCount: string;
+      essentials: string[];
+    };
+    commercial?: {
+      establishmentSize: string;
+      primaryGoal: string;
+    };
+    offGrid?: {
+      locationDescription: string;
+    };
+  };
 }
 
 export async function sendContactNotification(data: ContactEmailData) {
@@ -434,6 +447,32 @@ export async function sendQuoteRequestNotification(data: QuoteRequestData) {
                     <div class="data-label">Timeframe</div>
                     <div class="data-value">${data.timeframe}</div>
                   </div>
+                  ${data.conditionalFields?.residential ? `
+                  <div class="data-row">
+                    <div class="data-label">Room Count</div>
+                    <div class="data-value"><strong>${data.conditionalFields.residential.roomCount}</strong></div>
+                  </div>
+                  <div class="data-row">
+                    <div class="data-label">Essential Items (24/7)</div>
+                    <div class="data-value">${data.conditionalFields.residential.essentials?.join(', ')}</div>
+                  </div>
+                  ` : ''}
+                  ${data.conditionalFields?.commercial ? `
+                  <div class="data-row">
+                    <div class="data-label">Establishment Size</div>
+                    <div class="data-value"><strong>${data.conditionalFields.commercial.establishmentSize}</strong></div>
+                  </div>
+                  <div class="data-row">
+                    <div class="data-label">Primary Goal</div>
+                    <div class="data-value">${data.conditionalFields.commercial.primaryGoal}</div>
+                  </div>
+                  ` : ''}
+                  ${data.conditionalFields?.offGrid?.locationDescription ? `
+                  <div class="data-row">
+                    <div class="data-label">Location Description</div>
+                    <div class="data-value" style="white-space: pre-wrap; line-height: 1.6;">${data.conditionalFields.offGrid.locationDescription}</div>
+                  </div>
+                  ` : ''}
                   ${data.notes ? `
                   <div class="data-row">
                     <div class="data-label">Project Notes</div>
@@ -604,6 +643,32 @@ export async function sendQuoteRequestConfirmation(data: QuoteRequestData) {
                     <div class="summary-label">Contact Phone</div>
                     <div class="summary-value">${data.phone}</div>
                   </div>
+                  ${data.conditionalFields?.residential ? `
+                  <div class="summary-row">
+                    <div class="summary-label">Room Count</div>
+                    <div class="summary-value"><strong>${data.conditionalFields.residential.roomCount}</strong></div>
+                  </div>
+                  <div class="summary-row">
+                    <div class="summary-label">Essential Items (24/7)</div>
+                    <div class="summary-value">${data.conditionalFields.residential.essentials?.join(', ')}</div>
+                  </div>
+                  ` : ''}
+                  ${data.conditionalFields?.commercial ? `
+                  <div class="summary-row">
+                    <div class="summary-label">Establishment Size</div>
+                    <div class="summary-value"><strong>${data.conditionalFields.commercial.establishmentSize}</strong></div>
+                  </div>
+                  <div class="summary-row">
+                    <div class="summary-label">Primary Goal</div>
+                    <div class="summary-value">${data.conditionalFields.commercial.primaryGoal}</div>
+                  </div>
+                  ` : ''}
+                  ${data.conditionalFields?.offGrid?.locationDescription ? `
+                  <div class="summary-row">
+                    <div class="summary-label">Location Description</div>
+                    <div class="summary-value" style="white-space: pre-wrap; line-height: 1.6;">${data.conditionalFields.offGrid.locationDescription}</div>
+                  </div>
+                  ` : ''}
                   ${data.notes ? `
                   <div class="summary-row">
                     <div class="summary-label">Project Notes</div>

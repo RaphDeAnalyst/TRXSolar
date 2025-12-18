@@ -5,7 +5,7 @@ import { sendQuoteRequestNotification, sendQuoteRequestConfirmation, QuoteReques
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, phone, projectType, timeframe, address, notes } = body;
+    const { name, email, phone, projectType, timeframe, address, notes, conditionalFields } = body;
 
     // Validate required fields
     if (!name || !email || !phone || !projectType || !timeframe || !address) {
@@ -29,10 +29,24 @@ export async function POST(request: NextRequest) {
     if (process.env.POSTGRES_URL) {
       try {
         // Save as a contact with structured message
+        let conditionalFieldsText = '';
+        if (conditionalFields?.residential) {
+          conditionalFieldsText = `
+Room Count: ${conditionalFields.residential.roomCount || 'Not specified'}
+Essential Items: ${conditionalFields.residential.essentials?.join(', ') || 'None selected'}`;
+        } else if (conditionalFields?.commercial) {
+          conditionalFieldsText = `
+Establishment Size: ${conditionalFields.commercial.establishmentSize || 'Not specified'}
+Primary Goal: ${conditionalFields.commercial.primaryGoal || 'Not specified'}`;
+        } else if (conditionalFields?.offGrid?.locationDescription) {
+          conditionalFieldsText = `
+Location Description: ${conditionalFields.offGrid.locationDescription}`;
+        }
+
         const message = `QUOTE REQUEST
 Project Type: ${projectType}
 Installation Timeframe: ${timeframe}
-Installation Address: ${address}
+Installation Address: ${address}${conditionalFieldsText}
 ${notes ? `\nAdditional Notes:\n${notes}` : ''}`;
 
         const result = await sql`
@@ -64,7 +78,8 @@ ${notes ? `\nAdditional Notes:\n${notes}` : ''}`;
       projectType: projectType as 'residential' | 'commercial' | 'off-grid',
       timeframe,
       address,
-      notes: notes || undefined
+      notes: notes || undefined,
+      conditionalFields: conditionalFields || undefined
     };
 
     // Try to send notification emails (non-blocking)

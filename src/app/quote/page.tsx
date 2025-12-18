@@ -1,8 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useToast } from '@/components/contexts/ToastContext';
+
+type ConditionalFields = {
+  residential?: {
+    roomCount: string;
+    essentials: string[];
+  };
+  commercial?: {
+    establishmentSize: string;
+    primaryGoal: string;
+  };
+  offGrid?: {
+    locationDescription: string;
+  };
+};
 
 type FormData = {
   projectType: 'residential' | 'commercial' | 'off-grid' | '';
@@ -12,6 +26,7 @@ type FormData = {
   email: string;
   phone: string;
   notes: string;
+  conditionalFields: ConditionalFields;
 };
 
 export default function QuotePage() {
@@ -24,11 +39,30 @@ export default function QuotePage() {
     email: '',
     phone: '',
     notes: '',
+    conditionalFields: {},
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [showSummary, setShowSummary] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+
+  // Reset conditional fields when project type changes
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      conditionalFields: {}
+    }));
+
+    // Clear conditional field errors
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors['conditionalFields.residential.roomCount' as keyof FormData];
+      delete newErrors['conditionalFields.residential.essentials' as keyof FormData];
+      delete newErrors['conditionalFields.commercial.establishmentSize' as keyof FormData];
+      delete newErrors['conditionalFields.commercial.primaryGoal' as keyof FormData];
+      return newErrors;
+    });
+  }, [formData.projectType]);
 
   const updateFormData = (field: keyof FormData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -36,6 +70,39 @@ export default function QuotePage() {
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
+  };
+
+  // Handler for conditional field updates
+  const updateConditionalField = (
+    projectType: 'residential' | 'commercial' | 'off-grid',
+    field: string,
+    value: string | string[]
+  ) => {
+    setFormData(prev => ({
+      ...prev,
+      conditionalFields: {
+        ...prev.conditionalFields,
+        [projectType]: {
+          ...prev.conditionalFields[projectType as keyof ConditionalFields],
+          [field]: value
+        }
+      }
+    }));
+
+    const errorKey = `conditionalFields.${projectType}.${field}`;
+    if (errors[errorKey as keyof typeof errors]) {
+      setErrors(prev => ({ ...prev, [errorKey]: '' }));
+    }
+  };
+
+  // Handler for multi-select checkboxes
+  const toggleEssential = (essential: string) => {
+    const currentEssentials = (formData.conditionalFields.residential?.essentials || []);
+    const newEssentials = currentEssentials.includes(essential)
+      ? currentEssentials.filter(e => e !== essential)
+      : [...currentEssentials, essential];
+
+    updateConditionalField('residential', 'essentials', newEssentials);
   };
 
   const validateForm = (): boolean => {
@@ -51,6 +118,24 @@ export default function QuotePage() {
       newErrors.email = 'Please enter a valid email address';
     }
     if (!formData.phone.trim()) newErrors.phone = 'Please enter your phone number';
+
+    // Validate conditional fields based on project type
+    if (formData.projectType === 'residential') {
+      if (!formData.conditionalFields.residential?.roomCount) {
+        newErrors['conditionalFields.residential.roomCount' as keyof FormData] = 'Please select room count';
+      }
+      if (!formData.conditionalFields.residential?.essentials?.length) {
+        newErrors['conditionalFields.residential.essentials' as keyof FormData] = 'Please select at least one essential';
+      }
+    } else if (formData.projectType === 'commercial') {
+      if (!formData.conditionalFields.commercial?.establishmentSize) {
+        newErrors['conditionalFields.commercial.establishmentSize' as keyof FormData] = 'Please select establishment size';
+      }
+      if (!formData.conditionalFields.commercial?.primaryGoal) {
+        newErrors['conditionalFields.commercial.primaryGoal' as keyof FormData] = 'Please select your primary goal';
+      }
+    }
+    // Note: off-grid location is optional
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -79,7 +164,8 @@ export default function QuotePage() {
         projectType: formData.projectType,
         timeframe: formData.timeframe,
         address: formData.address,
-        notes: formData.notes
+        notes: formData.notes,
+        conditionalFields: formData.conditionalFields
       };
 
       const response = await fetch('/api/quote', {
@@ -113,6 +199,7 @@ export default function QuotePage() {
         email: '',
         phone: '',
         notes: '',
+        conditionalFields: {},
       });
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Failed to submit. Please try again.');
@@ -157,6 +244,128 @@ export default function QuotePage() {
               </div>
               {errors.projectType && <p className="text-caption text-red-500 mt-xs">{errors.projectType}</p>}
             </div>
+
+            {/* Conditional Fields Based on Project Type */}
+            {formData.projectType && (
+              <div className="bg-background border border-border rounded-lg p-md mt-sm">
+                {/* RESIDENTIAL FIELDS */}
+                {formData.projectType === 'residential' && (
+                  <>
+                    <div className="mb-6">
+                      <label className="block text-body text-text-primary font-medium mb-sm">
+                        How many rooms are in the building? <span className="text-primary">*</span>
+                      </label>
+                      <select
+                        value={formData.conditionalFields.residential?.roomCount || ''}
+                        onChange={(e) => updateConditionalField('residential', 'roomCount', e.target.value)}
+                        className="w-full px-md py-sm border border-border rounded focus:outline-none focus:border-primary"
+                        aria-label="Room count"
+                      >
+                        <option value="">Select room count</option>
+                        <option value="1-2 Rooms">1-2 Rooms</option>
+                        <option value="3-4 Rooms">3-4 Rooms</option>
+                        <option value="5-7 Rooms">5-7 Rooms</option>
+                        <option value="8+ Rooms/Duplex">8+ Rooms/Duplex</option>
+                      </select>
+                      {errors['conditionalFields.residential.roomCount' as keyof typeof errors] && (
+                        <p className="text-caption text-red-500 mt-xs">
+                          {errors['conditionalFields.residential.roomCount' as keyof typeof errors]}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-body text-text-primary font-medium mb-sm">
+                        Which essentials do you want to keep running 24/7? <span className="text-primary">*</span>
+                      </label>
+                      <div className="space-y-sm">
+                        {['Fridge/Freezer', 'Home Office', 'Fans & Lighting', 'Television', 'AC'].map((essential) => (
+                          <label key={essential} className="flex items-center gap-4 cursor-pointer min-h-touch py-xs">
+                            <input
+                              type="checkbox"
+                              checked={formData.conditionalFields.residential?.essentials?.includes(essential) || false}
+                              onChange={() => toggleEssential(essential)}
+                              className="w-5 h-5 flex-shrink-0"
+                            />
+                            <span className="text-body text-text-primary flex-1">{essential}</span>
+                          </label>
+                        ))}
+                      </div>
+                      {errors['conditionalFields.residential.essentials' as keyof typeof errors] && (
+                        <p className="text-caption text-red-500 mt-xs">
+                          {errors['conditionalFields.residential.essentials' as keyof typeof errors]}
+                        </p>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* COMMERCIAL FIELDS */}
+                {formData.projectType === 'commercial' && (
+                  <>
+                    <div className="mb-6">
+                      <label className="block text-body text-text-primary font-medium mb-sm">
+                        What is the size of your establishment? <span className="text-primary">*</span>
+                      </label>
+                      <select
+                        value={formData.conditionalFields.commercial?.establishmentSize || ''}
+                        onChange={(e) => updateConditionalField('commercial', 'establishmentSize', e.target.value)}
+                        className="w-full px-md py-sm border border-border rounded focus:outline-none focus:border-primary"
+                        aria-label="Establishment size"
+                      >
+                        <option value="">Select establishment size</option>
+                        <option value="Small Office/Shop">Small Office/Shop</option>
+                        <option value="Medium Building">Medium Building</option>
+                        <option value="Large Warehouse/Factory">Large Warehouse/Factory</option>
+                      </select>
+                      {errors['conditionalFields.commercial.establishmentSize' as keyof typeof errors] && (
+                        <p className="text-caption text-red-500 mt-xs">
+                          {errors['conditionalFields.commercial.establishmentSize' as keyof typeof errors]}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-body text-text-primary font-medium mb-sm">
+                        What is your primary goal? <span className="text-primary">*</span>
+                      </label>
+                      <select
+                        value={formData.conditionalFields.commercial?.primaryGoal || ''}
+                        onChange={(e) => updateConditionalField('commercial', 'primaryGoal', e.target.value)}
+                        className="w-full px-md py-sm border border-border rounded focus:outline-none focus:border-primary"
+                        aria-label="Primary goal"
+                      >
+                        <option value="">Select your primary goal</option>
+                        <option value="Stop business interruptions">Stop business interruptions</option>
+                        <option value="Reduce fuel costs">Reduce fuel costs</option>
+                        <option value="24/7 Server/Security power">24/7 Server/Security power</option>
+                      </select>
+                      {errors['conditionalFields.commercial.primaryGoal' as keyof typeof errors] && (
+                        <p className="text-caption text-red-500 mt-xs">
+                          {errors['conditionalFields.commercial.primaryGoal' as keyof typeof errors]}
+                        </p>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* OFF-GRID FIELD */}
+                {formData.projectType === 'off-grid' && (
+                  <div>
+                    <label className="block text-body text-text-primary font-medium mb-sm">
+                      Tell us about the location you want to power
+                    </label>
+                    <textarea
+                      value={formData.conditionalFields.offGrid?.locationDescription || ''}
+                      onChange={(e) => updateConditionalField('off-grid', 'locationDescription', e.target.value)}
+                      rows={3}
+                      className="w-full px-md py-sm border border-border rounded focus:outline-none focus:border-primary resize-none"
+                      placeholder="e.g., A farm house, remote cabin, or construction site"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Timeframe */}
             <div>
@@ -305,6 +514,46 @@ export default function QuotePage() {
                       <p className="text-caption text-text-secondary mb-xs">Installation Timeframe</p>
                       <p className="text-body text-text-primary font-medium">{formData.timeframe}</p>
                     </div>
+                    {formData.projectType === 'residential' && formData.conditionalFields.residential && (
+                      <>
+                        <div>
+                          <p className="text-caption text-text-secondary mb-xs">Room Count</p>
+                          <p className="text-body text-text-primary font-medium">
+                            {formData.conditionalFields.residential.roomCount}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-caption text-text-secondary mb-xs">Essential Items</p>
+                          <p className="text-body text-text-primary font-medium">
+                            {formData.conditionalFields.residential.essentials?.join(', ')}
+                          </p>
+                        </div>
+                      </>
+                    )}
+                    {formData.projectType === 'commercial' && formData.conditionalFields.commercial && (
+                      <>
+                        <div>
+                          <p className="text-caption text-text-secondary mb-xs">Establishment Size</p>
+                          <p className="text-body text-text-primary font-medium">
+                            {formData.conditionalFields.commercial.establishmentSize}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-caption text-text-secondary mb-xs">Primary Goal</p>
+                          <p className="text-body text-text-primary font-medium">
+                            {formData.conditionalFields.commercial.primaryGoal}
+                          </p>
+                        </div>
+                      </>
+                    )}
+                    {formData.projectType === 'off-grid' && formData.conditionalFields.offGrid?.locationDescription && (
+                      <div className="sm:col-span-2">
+                        <p className="text-caption text-text-secondary mb-xs">Location Description</p>
+                        <p className="text-body text-text-primary font-medium whitespace-pre-wrap">
+                          {formData.conditionalFields.offGrid.locationDescription}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
