@@ -2,6 +2,7 @@ import { Product } from './types';
 
 /**
  * Generates a WhatsApp link with pre-filled message containing product details
+ * Uses %0A for line breaks to ensure proper spacing on mobile devices
  */
 export function generateWhatsAppLink(product: Product): string {
   // WhatsApp number in international format (Nigerian number)
@@ -10,41 +11,49 @@ export function generateWhatsAppLink(product: Product): string {
   // International format: 234 810 869 8673 (no +, no spaces, no dashes)
   const phoneNumber = '2348108698673';
 
-  const message = `Hi! I'm interested in the ${product.name} by ${product.brand}.
+  // Format category name: replace hyphens with spaces and capitalize
+  const categoryName = product.category
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 
-Price: ₦${product.price.toLocaleString('en-NG')}
-Category: ${product.category.replace('-', ' ')}
+  // Format price with Naira symbol
+  const formattedPrice = `₦${product.price.toLocaleString('en-NG')}`;
 
-Could you provide more details and a quote?`;
-
-  const encodedMessage = encodeURIComponent(message);
+  // Construct message with %0A for line breaks (better mobile formatting)
+  const message = `Hi VCSolar! 👋 I'm interested in the ${product.name}%0A%0APrice: ${formattedPrice}%0ACategory: ${categoryName}%0A%0ACan you confirm if this is in stock?`;
 
   // Using wa.me format (official WhatsApp click-to-chat link)
   // https://wa.me/<number>?text=<message>
-  return `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+  // Note: %0A is already in the message, so we don't use encodeURIComponent
+  // to preserve the line break formatting
+  return `https://wa.me/${phoneNumber}?text=${message}`;
 }
 
 /**
  * Generates an email link with pre-filled subject and body containing product details
+ * Uses buying-focused language to increase conversion intent
  */
 export function generateEmailLink(product: Product): string {
-  const email = 'info@vcsolar.com';
-  const subject = `Inquiry: ${product.name} - ${product.brand}`;
+  const email = 'sales@vcsolar.com';
+  const subject = `Purchase Order: ${product.name} - ${product.brand}`;
 
-  // Get current page URL if in browser environment
-  const pageUrl = typeof window !== 'undefined' ? window.location.href : '';
+  // Format category name: replace hyphens with spaces and capitalize
+  const categoryName = product.category
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 
   const body = `Hello VC Solar Team,
 
-I am interested in learning more about:
+I would like to place an order for the following:
 
 Product: ${product.name}
 Brand: ${product.brand}
 Price: ₦${product.price.toLocaleString('en-NG')}
-Category: ${product.category.replace('-', ' ')}
-${pageUrl ? `\nProduct Page: ${pageUrl}` : ''}
+Category: ${categoryName}
 
-Please provide additional information and a quotation.
+Please confirm availability and send a formal invoice with your banking details so I can finalize this purchase.
 
 Thank you!`;
 

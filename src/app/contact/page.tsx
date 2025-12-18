@@ -63,7 +63,7 @@ export default function ContactPage() {
       {/* Hero Section */}
       <ContactHero
         title="Start Your Solar Journey"
-        subtitle="Get a free estimate or ask us anything"
+        subtitle="Select an option below to get your personalized power solution or talk to our team."
         backgroundImage="/solar_tech_banner.jpg"
       />
 

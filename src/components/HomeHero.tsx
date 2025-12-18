@@ -72,7 +72,7 @@ export default function HomeHero() {
         <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto items-center justify-center">
           {/* Primary CTA - WhatsApp (Massive Touch Target on Mobile) */}
           <a
-            href="https://wa.me/263775780833?text=Hi%2C%20I%27m%20interested%20in%20going%20solar"
+            href="https://wa.me/2348108698673?text=Hi%2C%20I%27m%20interested%20in%20going%20solar"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-[#25D366] text-white px-8 py-4 font-display font-semibold text-base md:text-lg hover:bg-[#20BA59] transition-colors shadow-lg rounded-lg min-h-[56px]"

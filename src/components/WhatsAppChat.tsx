@@ -38,9 +38,12 @@ export default function WhatsAppChat() {
     };
   }, []);
 
+  const message = "Hi VCSolar! I'm interested in a solar quote for my [Home/Office]. My location is [Insert Area/City]. Can you tell me the best system for my needs?";
+  const whatsappUrl = `https://wa.me/2348108698673?text=${encodeURIComponent(message)}`;
+
   return (
     <a
-      href="https://wa.me/2348108698673"
+      href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
       className={`fixed bottom-4 right-4 md:bottom-6 md:right-6 z-40 w-12 h-12 md:w-16 md:h-16 flex items-center justify-center bg-[#25D366] text-white hover:bg-[#20BA5A] transition-all duration-300 hover:scale-110 shadow-xl rounded-full ${

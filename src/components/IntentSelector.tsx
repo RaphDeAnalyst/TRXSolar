@@ -25,9 +25,9 @@ export default function IntentSelector({ onSelectIntent, selectedIntent }: Inten
               ? 'bg-primary text-surface ring-2 ring-primary ring-offset-2'
               : 'bg-primary text-surface hover:bg-primary-dark'
           }`}
-          aria-label="Get a free solar estimate"
+          aria-label="Request custom solar system quote"
         >
-          <span className="text-lg md:text-xl">Get a FREE Solar Estimate</span>
+          <span className="text-lg md:text-xl">Request Custom Quote</span>
         </button>
 
         {/* Secondary CTA - General Question */}
@@ -38,9 +38,9 @@ export default function IntentSelector({ onSelectIntent, selectedIntent }: Inten
               ? 'border-primary bg-primary/10 text-primary ring-2 ring-primary ring-offset-2'
               : 'border-primary text-primary hover:bg-primary/5'
           }`}
-          aria-label="Have a general question"
+          aria-label="Message a solar expert"
         >
-          <span className="text-lg md:text-xl">Have a General Question?</span>
+          <span className="text-lg md:text-xl">Message a Solar Expert</span>
         </button>
       </div>
 
