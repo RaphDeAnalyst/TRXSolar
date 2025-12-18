@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import WishlistIcon from './WishlistIcon';
@@ -39,8 +40,16 @@ export default function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-gray-900 shadow-md h-[var(--header-height)]">
       <nav className="max-w-7xl mx-auto px-md h-full flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="text-2xl font-bold text-primary-light">
-          VCSolar
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/Logo.png"
+            alt="VC Solar and Electricals - Quality Solar Energy Solutions"
+            height={40}
+            width={160}
+            priority
+            style={{ width: 'auto', height: '40px' }}
+            unoptimized
+          />
         </Link>
 
         {/* Navigation */}
@@ -160,10 +169,17 @@ export default function Header() {
           <div className="flex items-center justify-between px-md py-md border-b border-gray-700">
             <Link
               href="/"
-              className="text-2xl font-bold text-primary-light"
+              className="flex items-center"
               onClick={() => setMobileMenuOpen(false)}
             >
-              VCSolar
+              <Image
+                src="/Logo.png"
+                alt="VC Solar and Electricals - Quality Solar Energy Solutions"
+                height={40}
+                width={160}
+                style={{ width: 'auto', height: '40px' }}
+                unoptimized
+              />
             </Link>
             <button
               type="button"

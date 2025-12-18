@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Footer() {
   return (
@@ -7,7 +8,15 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-lg mb-lg">
           {/* About */}
           <div>
-            <h3 className="font-bold text-lg mb-md">VCSolar</h3>
+            <Image
+              src="/Logo.png"
+              alt="VC Solar and Electricals - Quality Solar Energy Solutions"
+              height={32}
+              width={128}
+              style={{ width: 'auto', height: '32px' }}
+              className="mb-sm"
+              unoptimized
+            />
             <p className="text-sm text-gray-300">
               Premium solar solutions for residential and commercial installations.
             </p>

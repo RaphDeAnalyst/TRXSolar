@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   keywords: 'solar panels, inverters, batteries, renewable energy, solar installation',
   viewport: 'width=device-width, initial-scale=1',
   robots: 'index, follow',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
